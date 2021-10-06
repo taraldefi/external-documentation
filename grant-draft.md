@@ -2,7 +2,7 @@
 https://taraldefi.github.io/
 
 # Short Deck/Intro
-<iframe src="https://pitch.com/embed/87dc9b45-eabd-4b24-9520-c0e7e059466a" allow="fullscreen" allowfullscreen="" width="560" height="315" style="border:0"></iframe>
+https://app.pitch.com/app/presentation/319f13c5-661b-4c07-8e6a-f4f6cb8d6f86/87dc9b45-eabd-4b24-9520-c0e7e059466a
 
 # Background 
 ## What problems do you aim to solve? How does it serve the mission of a user-owned internet?
@@ -33,10 +33,6 @@ In order to accomplish this, beyond the escrow function, two additional pools of
 
 Investors will have the opportunity to lock up funds and earn a set return based on the return generated from the insurance premium charged for the individual transaction between buyer and seller.
 
-Given that customers will be denominating in fiat, a stablecoin will need to be minted based on the value of the STX locked within the protocol. For example, if a Stacker locks 100k Stacks tokens at a value of $1.50 per token, then [some] % of the USD value of Stacks locked will be minted as a stablecoin to fund the loans. Incorporation of a pooling function.
-
-Given that a large proportion of customers will still required fiat tokens, there will also need to be an on- and off-ramp piece that allows participants to access their funds and similarly repay loan amounts to the protocol.
-
 The liquidity pool will allow investors to either select the individual loans that they want to finance (30/60/90 day duration). These will have a varying yield based on the collateral supplied and the individual risk in the transaction. To ensure ongoing liquidity, a second pool of liquidity will be formed for bundled credit that could be financed for example by locked Stacks tokens.
 
 As Taral will not be acting as a custodian of the funds, Taral will create a DAO that will allow for protocol participants to contribute to the governance of the protocol.
@@ -66,7 +62,7 @@ As Taral will not be acting as a custodian of the funds, Taral will create a DAO
 * As the Stacks ecosystem is still young, there are some pieces missing such as chainlink integration which we'd need for the price feeds of on-chain and off-chain assets. The plan is to start with an own oracle implementation that would ensure on-chain assets price is up-to-date
 * On-ramp and off-ramp is currently hard to integrate but with USDC planning to expand to stacks — then it will be possible.
 * Swapping bitcoin with TAL won't have an excellent user experience since it doesn't cover bitcoin transactions (yet).
-* Commercial risk: Unfriendly/confusing UI
+* Commercial risk: Unfriendly/confusing UI. Given that a large proportion of customers will still require fiat tokens, there will also need to be an on- and off-ramp piece that allows participants to access their funds and similarly repay loan amounts to the protocol.
 * Fraud risk: Bad actors
 * Technical risk: Security. Security is of most importance in DEFI. Happily Clarity is a decidable language and has extensive mechanisms to ensure security. The smart contracts will be secured, unit tested and battle tested to ensure security.
 
