@@ -5,37 +5,41 @@ https://taraldefi.github.io/
 https://app.pitch.com/app/presentation/319f13c5-661b-4c07-8e6a-f4f6cb8d6f86/87dc9b45-eabd-4b24-9520-c0e7e059466a
 
 # Background 
-## What problems do you aim to solve? How does it serve the mission of a user-owned internet?
+## What problems do you aim to solve?
+
+Ultimately, we are building a platform that enables "farmers" to generate stable yield from high-quality trade finance loans, protocol participants to gain upside in the insurance protocol, and buyers and sellers of international goods to securely release payment on delivery and utilise short duration loans for their inventory financing. For the scope of this grant, we will be focusing specifically on delivering smart contracts and a basic UI that demonstrates demonstrates the ability for buyers and sellers to confirm their purchase and capture the transaction data in an NFT that will act as collateral for lenders.
 
 The international payments market between international suppliers and buyers of goods is fraught with risks of non-payment. Letter of Credit transactions are used to intermediate between parties and to provide a level of assurance to counterparties that delivery will take place before funds are released by buyers. Banks are currently the centralised parties of trust for these transactions, leveraging their reputation in ensuring security and trust. The global Letter of Credit market is $2.8 trillion per year and the uncovered international "open book" market is ca. $8 trillion per year.
 
-Building on Stacks can solve this allowing buyers and sellers to transact directly with one another -- at a lower cost, better user experience, and higher speeds.
+Taral will solve this by allowing buyers and sellers to transact directly with one another -- at a lower cost, better user experience, and higher speeds.
 
-By collateralising real-word financial assets (supply chain finance) on chain, we help to move the world further towards a user owned internet and drive real-world, daily, business transactions on DeFi. Given the team's background in the cross-border trade finance space, this marks the beginning of bringing a multitude of high-quality, real-world assets to Stacks.
+# Project Overview
+## What solution are you providing?
+Letter of credit products are often costly and present issues when managing this in a smaller environment. Fundamentally, we find that these costs are prohibitive and can cost as much as 5-8% for a letter of credit for smaller transactions.
 
-These assets are traditionally stable-yield assets reflecting the ethos of the Stacks community that has grown around a stable, proven, highly-secure protocol away from hype.
+This can be resolved with smart contracts. By ensuring that funds are only released when the party has shipped the goods or when the buyer has confirmed that the goods have been received, we can demonstrate a way of maintaining custody of the funds bringing security to both parties. 
+
+Two additional pools of liquidity will be created. One will be a pool that will cater to providing insurance against defaults and the other a liquidity pool for providing cashflow and loans to the involved parties.
+
+Investors will have the opportunity to lock up funds and earn a set return based on the return generated from the insurance premium charged for the individual transaction between buyer and seller.
+
+The liquidity pool will allow investors to either select the individual loans that they want to finance (30/60/90 day duration). These will have a varying yield based on the collateral supplied and the individual risk in the transaction.
+
+## Why is this project beneficial for the Stacks community? How does it serve the mission of a user-owned internet?
+
+By collateralising real-word financial assets (supply chain finance) on chain, we help to move the world further towards a user owned internet and drive real-world, daily, business transactions on DeFi. Given the team's background in the cross-border trade finance space, this marks the beginning of bringing a diverse range of high-quality, real-world assets to Stacks.
+
+These assets are traditionally stable-yield assets reflecting the ethos of the Stacks community that has grown around a stable, proven, and highly-secure protocol.
+
+After the recent launch of Arkadiko bringing with it the ability to mint USDA, Taral brings a real-world application for stablecoins. By allowing trade finance loans to be bridged to the Stacks ecosystem,  this project will be beneficial for DeFi users, opening up a channel to real-world assets and diversifying the range of assets available.
+
+Reputable asset originators are able to source credit lines for high-quality financial assets, starting with import/export working capital financing.
+
+As Taral will not be acting as a custodian of the funds, Taral will create a DAO that will allow for protocol participants to contribute to the governance of the protocol.
 
 ### Why Stacks?
 
 Stacks is built on Bitcoin, one of the most established and well known cryptocurrency protocols. By building on Stacks and therefore on Bitcoin, we are building on a secure, well established protocol, with a small attack surface. This does not necessarily guarantee the security of the protocol, but it does lend a great deal of credible, proven support from the start. Other systems are yet to develop the track record and some are still open to attacks. Without opining on the quality of the code and the method of attack used, the unfortunate attack on the Poly Network is an example of where vulnerabilities can be exploited by hackers to steal funds huge amounts of funds. The size and potential volume of the market means security is paramount for institutional money to follow.
-
-# Project Overview
-## What solution are you providing? Who will it serve?
-Letter of credit products are often costly and present issues when managing this in a smaller environment. Fundamentally, we find that costs are prohibitive and can cost as much as 5-8% for a letter of credit for smaller transactions.
-
-Institutions and processes have been slow to adopt the latest technology, rendering processing and access to finance expensive and complicated.
-
-This can be resolved with smart contracts. By ensuring that funds are only released when the party has shipped the goods or when the buyer has confirmed that the goods have been received, we can demonstrate a way of maintaining custody of the funds bringing security to both parties. 
-
-This will dramatically unlock small ticket letter of credit solutions where companies have not been previously been able to access this and enable a decentralised method of accessing liquidity and bringing trust to international transactions without the requirement of using a centralised party such as banks.
-
-In order to accomplish this, beyond the escrow function, two additional pools of liquidity will be created. One will be a pool that will cater to providing insurance against defaults and the other a liquidity pool for providing cashflow and loans to the involved parties.
-
-Investors will have the opportunity to lock up funds and earn a set return based on the return generated from the insurance premium charged for the individual transaction between buyer and seller.
-
-The liquidity pool will allow investors to either select the individual loans that they want to finance (30/60/90 day duration). These will have a varying yield based on the collateral supplied and the individual risk in the transaction. To ensure ongoing liquidity, a second pool of liquidity will be formed for bundled credit that could be financed for example by locked Stacks tokens.
-
-As Taral will not be acting as a custodian of the funds, Taral will create a DAO that will allow for protocol participants to contribute to the governance of the protocol.
 
 # Team
 
@@ -73,11 +77,13 @@ As Taral will not be acting as a custodian of the funds, Taral will create a DAO
 * Fraud risk:Ensure that we work with trusted companies within our network initially
 * Technical risk: Ensure security of the product and have tests for pessimistic scenarios.
 
-All estimations below are in hours and are primarily covering the time for smart contracts and web application development. A small hourly allocation per user story has been included for design (1-5 hours depending on complexity of the user story). The Taral team is, course, happy to be paid in STX.
+All estimations below are in hours and are primarily covering the time for smart contracts and web application development. A small hourly allocation per user story has been included for design (1-5 hours depending on complexity of the user story). The Taral team is, of course, happy to be paid in STX.
 
 We are keen to hear from other community members with capacity and an interest in helping bring real-world assets to Stacks.
 
 ### Milestone 1: $13,350
+
+Final deliverable:
 
 | User Story ID | Description | Estimation |
 | ----------- | ----------- | ----------- |
@@ -87,33 +93,12 @@ We are keen to hear from other community members with capacity and an interest i
 | 19 |	I need to have a web boilerplate | 34 |
 | 14 |	I need to be able to see and review the underlying asset into which I am providing liquidity | 45 |
 
-### Milestone 2: $7,850
+### Milestone 2: $6,250
+
+Final deliverable:
 
 | User Story ID | Description | Estimation |
 | ----------- | ----------- | ----------- |
-| 3 | I need to be able to select the payment terms (when payment should be released & over which duration I would like to repay the outstanding amount) | 13 |
+| 3 |   I need to be able to select the payment terms (when payment should be released & over which duration I would like to repay the outstanding amount) | 13 |
 | 5 |	I need to be able to confirm receipt of shipment of goods and thereby release remaining agreed funds to exporter | 53 |
 | 9 |	I need to be able to upload proof of delivery/shipment of goods | 59 |
-
-### Milestone 3: $27,350
-
-| User Story ID | Description | Estimation |
-| ----------- | ----------- | ----------- |
-| 8 |   I need to be able to select the payment terms (when payment should be released & over which duration I would like to repay the outstanding amount) | 63 |
-| 6 |   I need to be able to view and sign or disapprove the purchase contract | 83 |
-| 10 |	I need to be able to input and approve purchase terms agreed with importer | 93 |
-| 11 |	I need to have a web boilerplate | 117 |
-| 4 |	I need to be able to confirm receipt of shipment of goods and thereby release remaining agreed funds to exporter | 178 |
-
-### Milestone 4: $23,850
-
-| User Story ID | Description | Estimation |
-| ----------- | ----------- | ----------- |
-| 20 |  I need to be able to select the payment terms (when payment should be released & over which duration I would like to repay the outstanding amount) | 33 |
-| 13 |  I need to be able to view and sign or disapprove the purchase contract | 43 |
-| 16 |	I need to be able to input and approve purchase terms agreed with importer | 43 |
-| 17 |	I need to have a web boilerplate | 43 |
-| 18 |	I need to be able to see the current status of the pricing model being applied to the products | 85 |
-| 15 |	I need to be able to confirm receipt of shipment of goods and thereby release remaining agreed funds to exporter | 99 |
-| 12 |	I need to be able to upload proof of delivery/shipment of goods | 131 |
-
