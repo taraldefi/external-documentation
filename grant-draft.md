@@ -47,7 +47,7 @@ Stacks is built on Bitcoin, one of the most established and well known cryptocur
 * Worked on a multitude of products in fintech and ecommerce
 * Lead and built teams of successful developers
 * Served as architect on various projects
-* Designed and coordinated teams throughout the whole product lifecycle.
+* Designed and coordinated teams throughout the whole product lifecycle
 
 ## Vincent:
 * Conducted user interviews with Euler Hermes, partner bank to understand their processes and integrations requirements, translating into detailed business requirements
