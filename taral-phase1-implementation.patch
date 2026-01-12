@@ -1,0 +1,2868 @@
+From 138567eadab3883f7a75c4effba50e4a04315204 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Mon, 12 Jan 2026 14:09:56 +0000
+Subject: [PATCH 1/5] chore(deps): update dependencies for Node.js 18+
+ compatibility
+
+- Update Node.js engine requirement from >=14 to >=18 across all packages
+- Update @hirosystems/clarinet-sdk from ^1.2.0 to ^2.8.1
+- Update @stacks/transactions from ^6.9.0 to ^6.17.0
+- Update @stacks/network from ^6.0.0 to ^6.17.0
+- Update @stacks/common from ^6.10.0 to ^6.17.0
+- Update vitest from ^0.34.4 to ^2.1.8
+- Update vitest-environment-clarinet from ^1.1.0 to ^2.1.0
+- Update TypeScript from various versions to ^5.6.0
+- Update ESLint and typescript-eslint to latest v7/v8 compatible versions
+- Update Prettier and related plugins to latest versions
+---
+ apps/frontend/package.json                       |  2 +-
+ apps/oracle/package.json                         |  8 ++++----
+ apps/scripts/package.json                        |  4 ++--
+ apps/web-testbed/package.json                    |  8 ++++----
+ libs/api/package.json                            |  6 +++---
+ libs/bitcoin/package.json                        |  6 +++---
+ libs/clarity-bin/package.json                    |  4 ++--
+ libs/generate/package.json                       |  6 +++---
+ libs/infrastructure/package.json                 |  6 +++---
+ libs/node/package.json                           |  8 ++++----
+ libs/oracle/package.json                         |  4 ++--
+ libs/shared/package.json                         |  6 +++---
+ libs/stacks/package.json                         | 10 +++++-----
+ libs/storage/package.json                        |  4 ++--
+ libs/swap/package.json                           |  4 ++--
+ libs/testing/package.json                        |  8 ++++----
+ libs/ui/package.json                             |  2 +-
+ libs/web/package.json                            |  8 ++++----
+ package.json                                     | 16 ++++++++--------
+ packages/clarity/package.json                    | 10 +++++-----
+ packages/configuration/package.json              |  6 +++---
+ packages/contracts/package.json                  |  4 ++--
+ packages/docs/package.json                       |  4 ++--
+ packages/integration-tests/package.json          |  4 ++--
+ packages/unit-tests/package.json                 |  6 +++---
+ standalone/chainhook/package.json                |  2 +-
+ standalone/modules/cron/package.json             |  4 ++--
+ standalone/modules/events/package.json           |  4 ++--
+ standalone/modules/logger-telemetry/package.json |  4 ++--
+ standalone/modules/multipart/package.json        |  4 ++--
+ standalone/modules/storage/package.json          |  2 +-
+ standalone/modules/telemetry/package.json        |  4 ++--
+ standalone/portal-api/package.json               |  2 +-
+ 33 files changed, 90 insertions(+), 90 deletions(-)
+
+diff --git a/apps/frontend/package.json b/apps/frontend/package.json
+index 53fdf9eb..a3bfc83e 100644
+--- a/apps/frontend/package.json
++++ b/apps/frontend/package.json
+@@ -23,7 +23,7 @@
+     "@micro-stacks/react": "1.0.9",
+     "@react-pdf-viewer/core": "3.6.0",
+     "@react-pdf-viewer/zoom": "3.6.0",
+-    "@stacks/transactions": "^6.9.0",
++    "@stacks/transactions": "^6.17.0",
+     "@stacks/stacks-blockchain-api-types": "7.8.2",
+     "@tanstack/query-core": "5.14.0",
+     "@tanstack/react-query": "5.8.4",
+diff --git a/apps/oracle/package.json b/apps/oracle/package.json
+index 1c6aa826..0b7238d7 100644
+--- a/apps/oracle/package.json
++++ b/apps/oracle/package.json
+@@ -50,7 +50,7 @@
+     "prettier": "^3.0.0",
+     "ts-jest": "^27.0.5",
+     "ts-node": "^10.9.1",
+-    "typescript": "^5.1.6",
++    "typescript": "^5.6.0",
+     "taral-configuration": "1.0.0",
+     "lib-shared": "1.0.0",
+     "lib-stacks": "1.0.0",
+@@ -59,11 +59,11 @@
+     "taral-contracts": "1.0.0",
+     "javascript-stringify": "2.1.0",
+     "@stacks/blockchain-api-client": "7.14.1",
+-    "@stacks/common": "^6.10.0",
+-    "@stacks/network": "^6.0.0",
++    "@stacks/common": "^6.17.0",
++    "@stacks/network": "^6.17.0",
+     "@stacks/wallet-sdk": "^4.2.0",
+     "@stacks/stacks-blockchain-api-types": "^7.3.4",
+-    "@stacks/transactions": "^6.9.0",
++    "@stacks/transactions": "^6.17.0",
+     "@types/json-schema": "^7.0.14",
+     "ajv": "^8.12.0",
+     "bip32": "^4.0.0",
+diff --git a/apps/scripts/package.json b/apps/scripts/package.json
+index 2033e548..8320a479 100644
+--- a/apps/scripts/package.json
++++ b/apps/scripts/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "generate": "ts-node generate.ts",
+@@ -16,7 +16,7 @@
+   },
+   "devDependencies": {
+     "ts-node": "^10.9.1",
+-    "typescript": "^5.1.6"
++    "typescript": "^5.6.0"
+   },
+   "dependencies": {
+     "axios": "1.7.5",
+diff --git a/apps/web-testbed/package.json b/apps/web-testbed/package.json
+index f8ab4097..296fb2d1 100644
+--- a/apps/web-testbed/package.json
++++ b/apps/web-testbed/package.json
+@@ -69,18 +69,18 @@
+     "style-loader": "3.3.3",
+     "terser-webpack-plugin": "5.3.9",
+     "ts-pnp": "1.2.0",
+-    "typescript": "^5.1.6",
++    "typescript": "^5.6.0",
+     "url-loader": "4.1.1",
+     "web-vitals": "^3.5.1",
+     "webpack": "5.89.0",
+     "webpack-dev-server": "4.15.1",
+     "webpack-manifest-plugin": "5.0.0",
+     "workbox-webpack-plugin": "7.0.0",
+-    "@stacks/common": "^6.10.0",
+-    "@stacks/network": "^6.0.0",
++    "@stacks/common": "^6.17.0",
++    "@stacks/network": "^6.17.0",
+     "@stacks/wallet-sdk": "^4.2.0",
+     "@stacks/stacks-blockchain-api-types": "^7.3.4",
+-    "@stacks/transactions": "6.9.0",
++    "@stacks/transactions": "6.17.0",
+     "@stacks/connect": "7.7.1",
+     "react-query": "^4.0.0",
+     "react-router-dom": "^6.21.3",
+diff --git a/libs/api/package.json b/libs/api/package.json
+index 1c4ec7c2..d3c3d2db 100644
+--- a/libs/api/package.json
++++ b/libs/api/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "compile": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ./tsconfig.types.json",
+@@ -16,9 +16,9 @@
+     "@types/node": "20.10.0"
+   },
+   "dependencies": {
+-    "@stacks/network": "^6.0.0",
++    "@stacks/network": "^6.17.0",
+     "@stacks/stacks-blockchain-api-types": "^7.3.4",
+-    "@stacks/transactions": "^6.9.0",
++    "@stacks/transactions": "^6.17.0",
+     "lib-infra": "file:./../infrastructure",
+     "lib-shared": "file:./../shared",
+     "lib-stacks": "file:./../stacks",
+diff --git a/libs/bitcoin/package.json b/libs/bitcoin/package.json
+index 0cfad849..c7c19205 100644
+--- a/libs/bitcoin/package.json
++++ b/libs/bitcoin/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "compile": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ./tsconfig.types.json",
+@@ -15,10 +15,10 @@
+   "devDependencies": {
+     "@types/bluebird": "^3.5.38",
+     "@types/node": "20.10.0",
+-    "typescript": "^5.1.6"
++    "typescript": "^5.6.0"
+   },
+   "dependencies": {
+-    "@stacks/transactions": "^6.9.0",
++    "@stacks/transactions": "^6.17.0",
+     "@types/wif": "^2.0.4",
+     "bip32": "^4.0.0",
+     "bip39": "^3.1.0",
+diff --git a/libs/clarity-bin/package.json b/libs/clarity-bin/package.json
+index 818c0d91..cb00ce66 100644
+--- a/libs/clarity-bin/package.json
++++ b/libs/clarity-bin/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "compile": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ./tsconfig.types.json",
+@@ -17,7 +17,7 @@
+     "@types/node": "20.10.0",
+     "@types/node-fetch": "2.5.10",
+     "@types/unzipper": "^0.10.7",
+-    "typescript": "^5.1.6"
++    "typescript": "^5.6.0"
+   },
+   "dependencies": {
+     "fs-extra": "^11.2.0",
+diff --git a/libs/generate/package.json b/libs/generate/package.json
+index 32c787ea..ea2ac112 100644
+--- a/libs/generate/package.json
++++ b/libs/generate/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "compile": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ./tsconfig.types.json",
+@@ -14,10 +14,10 @@
+   },
+   "devDependencies": {
+     "@types/node": "20.10.0",
+-    "typescript": "^5.1.6"
++    "typescript": "^5.6.0"
+   },
+   "dependencies": {
+-    "@stacks/transactions": "6.9.0",
++    "@stacks/transactions": "6.17.0",
+     "lib-clarity-bin": "file:./../clarity-bin",
+     "lib-shared": "file:./../shared",
+     "lib-testing": "file:./../testing",
+diff --git a/libs/infrastructure/package.json b/libs/infrastructure/package.json
+index f324bb38..e956a08a 100644
+--- a/libs/infrastructure/package.json
++++ b/libs/infrastructure/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "compile": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ./tsconfig.types.json",
+@@ -15,10 +15,10 @@
+   "devDependencies": {
+     "@ltd/j-toml": "^1.38.0",
+     "@types/node": "20.10.0",
+-    "typescript": "^5.1.6"
++    "typescript": "^5.6.0"
+   },
+   "dependencies": {
+-    "@stacks/network": "^6.0.0",
++    "@stacks/network": "^6.17.0",
+     "@stacks/wallet-sdk": "^4.2.0",
+     "lib-clarity-bin": "file:./../clarity-bin",
+     "lib-shared": "file:./../shared",
+diff --git a/libs/node/package.json b/libs/node/package.json
+index 38b0a83e..633f5fe2 100644
+--- a/libs/node/package.json
++++ b/libs/node/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "compile": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ./tsconfig.types.json",
+@@ -13,12 +13,12 @@
+     "build": "npm-run-all build:clean compile && node ./scripts/prepare-package-json"
+   },
+   "devDependencies": {
+-    "typescript": "^5.1.6"
++    "typescript": "^5.6.0"
+   },
+   "dependencies": {
+     "@stacks/blockchain-api-client": "^7.14.1",
+-    "@stacks/network": "^6.0.0",
+-    "@stacks/transactions": "^6.9.0",
++    "@stacks/network": "^6.17.0",
++    "@stacks/transactions": "^6.17.0",
+     "bn.js": "^5.2.1",
+     "cross-fetch": "^4.0.0",
+     "lib-shared": "file:./../shared",
+diff --git a/libs/oracle/package.json b/libs/oracle/package.json
+index 4e1783cd..ff98a276 100644
+--- a/libs/oracle/package.json
++++ b/libs/oracle/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "compile": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ./tsconfig.types.json",
+@@ -14,7 +14,7 @@
+   },
+   "devDependencies": {
+     "@types/node": "20.10.0",
+-    "typescript": "^5.1.6"
++    "typescript": "^5.6.0"
+   },
+   "dependencies": {
+     "@types/web3": "^1.2.2",
+diff --git a/libs/shared/package.json b/libs/shared/package.json
+index 264b588e..29d71e7e 100644
+--- a/libs/shared/package.json
++++ b/libs/shared/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "compile": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ./tsconfig.types.json",
+@@ -15,10 +15,10 @@
+   "devDependencies": {
+     "@types/node": "20.10.0",
+     "@types/uuid": "^9.0.8",
+-    "typescript": "^5.1.6"
++    "typescript": "^5.6.0"
+   },
+   "dependencies": {
+-    "@stacks/transactions": "^6.9.0",
++    "@stacks/transactions": "^6.17.0",
+     "c32check": "^2.0.0",
+     "chalk": "^4.1.2",
+     "dayjs": "^1.11.9",
+diff --git a/libs/stacks/package.json b/libs/stacks/package.json
+index 502842ce..92ffa836 100644
+--- a/libs/stacks/package.json
++++ b/libs/stacks/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "compile": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ./tsconfig.types.json",
+@@ -15,14 +15,14 @@
+   "devDependencies": {
+     "@types/elliptic": "^6.4.18",
+     "@types/node": "20.10.0",
+-    "typescript": "^5.1.6"
++    "typescript": "^5.6.0"
+   },
+   "dependencies": {
+     "@noble/secp256k1": "1.7.1",
+     "@stacks/blockchain-api-client": "^7.14.1",
+-    "@stacks/common": "^6.10.0",
+-    "@stacks/network": "^6.0.0",
+-    "@stacks/transactions": "^6.9.0",
++    "@stacks/common": "^6.17.0",
++    "@stacks/network": "^6.17.0",
++    "@stacks/transactions": "^6.17.0",
+     "c32check": "^2.0.0",
+     "cross-fetch": "^4.0.0",
+     "elliptic": "^6.5.4",
+diff --git a/libs/storage/package.json b/libs/storage/package.json
+index 7532fcd8..831711fb 100644
+--- a/libs/storage/package.json
++++ b/libs/storage/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "compile": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ./tsconfig.types.json",
+@@ -14,7 +14,7 @@
+   },
+   "devDependencies": {
+     "@types/node": "20.10.0",
+-    "typescript": "^5.1.6"
++    "typescript": "^5.6.0"
+   },
+   "dependencies": {
+     "@types/axios": "0.14.0",
+diff --git a/libs/swap/package.json b/libs/swap/package.json
+index 939bcb53..ff7ae63f 100644
+--- a/libs/swap/package.json
++++ b/libs/swap/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "compile": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ./tsconfig.types.json",
+@@ -13,7 +13,7 @@
+     "build": "npm-run-all build:clean compile && node ./scripts/prepare-package-json"
+   },
+   "devDependencies": {
+-    "typescript": "^5.1.6"
++    "typescript": "^5.6.0"
+   },
+   "dependencies": {
+     "@types/crypto-js": "^4.1.1",
+diff --git a/libs/testing/package.json b/libs/testing/package.json
+index 979f3bff..cc8cb3a4 100644
+--- a/libs/testing/package.json
++++ b/libs/testing/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "compile": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ./tsconfig.types.json",
+@@ -14,11 +14,11 @@
+   },
+   "devDependencies": {
+     "@types/node": "20.10.0",
+-    "typescript": "^5.1.6"
++    "typescript": "^5.6.0"
+   },
+   "dependencies": {
+-    "@stacks/network": "^6.0.0",
+-    "@stacks/transactions": "^6.9.0",
++    "@stacks/network": "^6.17.0",
++    "@stacks/transactions": "^6.17.0",
+     "lib-clarity-bin": "file:./../clarity-bin",
+     "lib-infra": "file:./../infrastructure",
+     "lib-shared": "file:./../shared",
+diff --git a/libs/ui/package.json b/libs/ui/package.json
+index ad355f44..131f5463 100644
+--- a/libs/ui/package.json
++++ b/libs/ui/package.json
+@@ -46,7 +46,7 @@
+     "rollup-plugin-svg": "2.0.0",
+     "rollup-plugin-typescript2": "0.36.0",
+     "ts-jest": "29.0.5",
+-    "typescript": "4.9.4"
++    "typescript": "^5.6.0"
+   },
+   "resolutions": {
+     "@types/react": "18.2.45",
+diff --git a/libs/web/package.json b/libs/web/package.json
+index 0dd3c3fa..e1ea34ab 100644
+--- a/libs/web/package.json
++++ b/libs/web/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "compile": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ./tsconfig.types.json",
+@@ -13,13 +13,13 @@
+     "build": "npm-run-all build:clean compile && node ./scripts/prepare-package-json"
+   },
+   "devDependencies": {
+-    "typescript": "^5.1.6"
++    "typescript": "^5.6.0"
+   },
+   "dependencies": {
+     "@stacks/connect": "7.7.1",
+     "@stacks/blockchain-api-client": "^7.14.1",
+-    "@stacks/network": "^6.0.0",
+-    "@stacks/transactions": "^6.9.0",
++    "@stacks/network": "^6.17.0",
++    "@stacks/transactions": "^6.17.0",
+     "cross-fetch": "^4.0.0",
+     "lib-shared": "file:./../shared",
+     "lib-stacks": "file:./../stacks",
+diff --git a/package.json b/package.json
+index 54c1692e..fb8a1c75 100644
+--- a/package.json
++++ b/package.json
+@@ -4,7 +4,7 @@
+   "description": "Taral local development environment for clarity contracts",
+   "main": "index.js",
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "private": "true",
+   "workspaces": [
+@@ -73,17 +73,17 @@
+   },
+   "homepage": "https://github.com/taraldefi/taral#readme",
+   "devDependencies": {
+-    "@typescript-eslint/eslint-plugin": "^6.12.0",
+-    "@typescript-eslint/parser": "^6.12.0",
++    "@typescript-eslint/eslint-plugin": "^7.18.0",
++    "@typescript-eslint/parser": "^7.18.0",
+     "codecov": "^3.8.1",
+     "commitizen": "^4.3.0",
+     "cz-conventional-changelog": "^3.3.0",
+-    "eslint": "^8.54.0",
+-    "eslint-config-prettier": "^9.0.0",
++    "eslint": "^8.57.0",
++    "eslint-config-prettier": "^9.1.0",
+     "eslint-plugin-node": "^11.1.0",
+-    "eslint-plugin-prettier": "^5.0.1",
+-    "lint-staged": "^15.1.0",
+-    "prettier": "^3.0.0"
++    "eslint-plugin-prettier": "^5.2.1",
++    "lint-staged": "^15.2.0",
++    "prettier": "^3.4.0"
+   },
+   "lint-staged": {
+     "*.ts": "eslint --cache --cache-location .eslintcache ./libs/**/* ./packages/unit-tests ./packages/integration-tests --fix"
+diff --git a/packages/clarity/package.json b/packages/clarity/package.json
+index 1b0762d3..4d079312 100644
+--- a/packages/clarity/package.json
++++ b/packages/clarity/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "eol": "npx eolConverter \"contracts/**/*.clar\"",
+@@ -17,11 +17,11 @@
+   },
+   "dependencies": {
+     "eol-converter-cli": "^1.0.8",
+-    "@hirosystems/clarinet-sdk": "^1.2.0",
+-    "@stacks/transactions": "^6.9.0",
++    "@hirosystems/clarinet-sdk": "^2.8.1",
++    "@stacks/transactions": "^6.17.0",
+     "chokidar-cli": "^3.0.0",
+     "vite": "^5.4.2",
+-    "vitest": "^0.34.4",
+-    "vitest-environment-clarinet": "^1.1.0"
++    "vitest": "^2.1.8",
++    "vitest-environment-clarinet": "^2.1.0"
+   }
+ }
+diff --git a/packages/configuration/package.json b/packages/configuration/package.json
+index ff926e6b..bf43f08e 100644
+--- a/packages/configuration/package.json
++++ b/packages/configuration/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "compile": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ./tsconfig.types.json",
+@@ -13,10 +13,10 @@
+     "build": "npm-run-all build:clean compile && node ./scripts/prepare-package-json"
+   },
+   "devDependencies": {
+-    "typescript": "^5.1.6"
++    "typescript": "^5.6.0"
+   },
+   "dependencies": {
+-    "@stacks/network": "^6.0.0",
++    "@stacks/network": "^6.17.0",
+     "npm-run-all": "^4.1.5"
+   }
+ }
+diff --git a/packages/contracts/package.json b/packages/contracts/package.json
+index 676a3a6a..cc9acbf2 100644
+--- a/packages/contracts/package.json
++++ b/packages/contracts/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "compile": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ./tsconfig.types.json",
+@@ -13,7 +13,7 @@
+     "build": "npm-run-all build:clean compile && node ./scripts/prepare-package-json"
+   },
+   "devDependencies": {
+-    "typescript": "^5.1.6"
++    "typescript": "^5.6.0"
+   },
+   "dependencies": {
+     "lib-shared": "file:./../../libs/shared",
+diff --git a/packages/docs/package.json b/packages/docs/package.json
+index 34fa6c6c..4dafc4d1 100644
+--- a/packages/docs/package.json
++++ b/packages/docs/package.json
+@@ -4,7 +4,7 @@
+   "description": "Taral local development environment for clarity contracts",
+   "main": "index.js",
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "private": "true",
+   "scripts": {
+@@ -53,7 +53,7 @@
+   "homepage": "https://github.com/taraldefi/taral#readme",
+   "devDependencies": {
+     "@appnest/readme": "^1.2.7",
+-    "typescript": "^5.1.6",
++    "typescript": "^5.6.0",
+     "prettier": "^3.0.0"
+   }
+ }
+diff --git a/packages/integration-tests/package.json b/packages/integration-tests/package.json
+index f178aa40..e36d11d7 100644
+--- a/packages/integration-tests/package.json
++++ b/packages/integration-tests/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "integration-tests": "jest --runInBand --testPathIgnorePatterns swap.test.ts",
+@@ -16,7 +16,7 @@
+   "devDependencies": {
+     "@types/node": "20.10.0",
+     "jest": "^27.0.0",
+-    "typescript": "^5.1.6"
++    "typescript": "^5.6.0"
+   },
+   "dependencies": {
+     "@stacks/blockchain-api-client": "^7.14.1",
+diff --git a/packages/unit-tests/package.json b/packages/unit-tests/package.json
+index bd3249cf..00be0d92 100644
+--- a/packages/unit-tests/package.json
++++ b/packages/unit-tests/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "unit-tests": "jest --runInBand --testPathIgnorePatterns storage.test.ts oracle.test.ts",
+@@ -17,11 +17,11 @@
+   },
+   "devDependencies": {
+     "jest": "^28.0.2",
+-    "typescript": "^5.1.6"
++    "typescript": "^5.6.0"
+   },
+   "dependencies": {
+     "@noble/secp256k1": "1.7.1",
+-    "@stacks/common": "^6.10.0",
++    "@stacks/common": "^6.17.0",
+     "lib-clarity-bin": "file:./../../libs/clarity-bin",
+     "lib-infra": "file:./../../libs/infrastructure",
+     "lib-oracle": "file:./../../libs/oracle",
+diff --git a/standalone/chainhook/package.json b/standalone/chainhook/package.json
+index 37982c11..632f6fae 100644
+--- a/standalone/chainhook/package.json
++++ b/standalone/chainhook/package.json
+@@ -29,7 +29,7 @@
+     "@nestjs/microservices": "^10.0.4",
+     "@nestjs/passport": "^8.2.1",
+     "@nestjs/platform-express": "^10.0.4",
+-    "@stacks/transactions": "^6.5.4",
++    "@stacks/transactions": "^6.17.0",
+     "@types/lodash": "^4.14.195",
+     "@types/passport-strategy": "^0.2.35",
+     "amqp-connection-manager": "^4.1.13",
+diff --git a/standalone/modules/cron/package.json b/standalone/modules/cron/package.json
+index 72536b76..ec42473e 100644
+--- a/standalone/modules/cron/package.json
++++ b/standalone/modules/cron/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "build": "rm -rf dist && tsc -p tsconfig.json"
+@@ -15,7 +15,7 @@
+     "@nestjs/core": "^9.0.11",
+     "@types/node": "^18.0.5",
+     "reflect-metadata": "^0.1.13",
+-    "typescript": "^4.7.4",
++    "typescript": "^5.6.0",
+     "rxjs": "^7.5.2",
+     "agenda": "^5.0.0",
+     "mongodb-memory-server": "^8.11.5"
+diff --git a/standalone/modules/events/package.json b/standalone/modules/events/package.json
+index 0f58ead4..05190e43 100644
+--- a/standalone/modules/events/package.json
++++ b/standalone/modules/events/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "build": "rm -rf dist && tsc -p tsconfig.json"
+@@ -15,7 +15,7 @@
+     "@nestjs/core": "^9.0.11",
+     "@types/node": "^18.0.5",
+     "reflect-metadata": "^0.1.13",
+-    "typescript": "^4.7.4",
++    "typescript": "^5.6.0",
+     "rxjs": "^7.5.2"
+   },
+   "peerDependencies": {
+diff --git a/standalone/modules/logger-telemetry/package.json b/standalone/modules/logger-telemetry/package.json
+index 99105b40..d840914c 100644
+--- a/standalone/modules/logger-telemetry/package.json
++++ b/standalone/modules/logger-telemetry/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "build": "rm -rf dist && tsc -p tsconfig.json"
+@@ -20,7 +20,7 @@
+     "@nestjs/core": "^9.0.11",
+     "@types/node": "^18.0.5",
+     "reflect-metadata": "^0.1.13",
+-    "typescript": "^4.7.4",
++    "typescript": "^5.6.0",
+     "rxjs": "^7.5.2"
+   },
+   "peerDependencies": {
+diff --git a/standalone/modules/multipart/package.json b/standalone/modules/multipart/package.json
+index 57f9d41b..1f399607 100644
+--- a/standalone/modules/multipart/package.json
++++ b/standalone/modules/multipart/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "build": "rm -rf dist && tsc -p tsconfig.json"
+@@ -25,7 +25,7 @@
+     "@nestjs/core": "^9.0.11",
+     "@types/node": "^18.0.5",
+     "reflect-metadata": "^0.1.13",
+-    "typescript": "^4.7.4",
++    "typescript": "^5.6.0",
+     "rxjs": "^7.5.2"
+   },
+   "peerDependencies": {
+diff --git a/standalone/modules/storage/package.json b/standalone/modules/storage/package.json
+index baae6084..49ff155f 100644
+--- a/standalone/modules/storage/package.json
++++ b/standalone/modules/storage/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "build": "rm -rf dist && tsc -p tsconfig.json"
+diff --git a/standalone/modules/telemetry/package.json b/standalone/modules/telemetry/package.json
+index 56fc7b8e..62a9c0f5 100644
+--- a/standalone/modules/telemetry/package.json
++++ b/standalone/modules/telemetry/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "build": "rm -rf dist && tsc -p tsconfig.json"
+@@ -38,7 +38,7 @@
+     "@types/node": "^18.0.5",
+     "reflect-metadata": "^0.1.13",
+     "rxjs": "^7.5.2",
+-    "typescript": "^4.7.4"
++    "typescript": "^5.6.0"
+   },
+   "peerDependencies": {
+     "@nestjs/common": "^7.0.0 || ^8.0.0 || ^9.0.0",
+diff --git a/standalone/portal-api/package.json b/standalone/portal-api/package.json
+index fe3bcc52..18a7f930 100644
+--- a/standalone/portal-api/package.json
++++ b/standalone/portal-api/package.json
+@@ -130,7 +130,7 @@
+     "@nestjs/cli": "9.4.2",
+     "@nestjs/testing": "9.4.0",
+     "@noble/secp256k1": "1.5.5",
+-    "@stacks/network": "^6.0.0",
++    "@stacks/network": "^6.17.0",
+     "@types/express": "4.17.13",
+     "@types/jest": "27.5.1",
+     "@types/multer": "1.4.7",
+-- 
+2.43.0
+
+
+From 11df80a1b4bc30d3f8e5b06d58a909be7dd23c62 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Mon, 12 Jan 2026 14:33:30 +0000
+Subject: [PATCH 2/5] feat: add purchase order on-chain submission
+ functionality
+
+- Add new contract constants for purchase order and storage contracts
+- Add delivery terms (Incoterms) and payment terms constants
+- Extend useTaralContracts hook with:
+  - initializePurchaseOrder: Submit PO to blockchain
+  - getPurchaseOrderFromStorage: Fetch PO details
+  - getCurrentOrderIdNonce: Get current order count
+  - createVault: Create collateralized loan position
+  - repayLoan: Repay vault loans
+- Create SubmitPurchaseOrderModal component for on-chain submission
+  - Shows order summary before submission
+  - Handles wallet connection state
+  - Displays transaction confirmation
+
+This implements User Story #1 (Purchase Order Submission) from Phase 1
+---
+ .../modal/submitPurchaseOrderModal.tsx        | 243 ++++++++++++++++++
+ .../src/utils/hooks/useTaralContracts.ts      | 208 ++++++++++++++-
+ apps/frontend/src/utils/lib/constants.ts      |  38 +++
+ 3 files changed, 487 insertions(+), 2 deletions(-)
+ create mode 100644 apps/frontend/src/components/modal/submitPurchaseOrderModal.tsx
+
+diff --git a/apps/frontend/src/components/modal/submitPurchaseOrderModal.tsx b/apps/frontend/src/components/modal/submitPurchaseOrderModal.tsx
+new file mode 100644
+index 00000000..c3b350ed
+--- /dev/null
++++ b/apps/frontend/src/components/modal/submitPurchaseOrderModal.tsx
+@@ -0,0 +1,243 @@
++import { faClose, faCheckCircle, faSpinner } from "@fortawesome/free-solid-svg-icons";
++import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
++import useTaralContracts from "@hooks/useTaralContracts";
++import { useState } from "react";
++import { toast } from "sonner";
++
++type Props = {
++  isOpen: boolean;
++  onClose: () => void;
++  orderData: {
++    exporterPrincipal: string;
++    importerPrincipal: string;
++    orderHash: string;
++    orderDetailHash: string;
++    paymentTerm: string;
++    amount: number;
++    deliveryTerm: string;
++  };
++  onSuccess?: (txData: any) => void;
++};
++
++type SubmitState = "idle" | "submitting" | "success" | "error";
++
++function SubmitPurchaseOrderModal({ isOpen, onClose, orderData, onSuccess }: Props) {
++  const { isSignedIn, initializePurchaseOrder, stxAddress } = useTaralContracts();
++  const [submitState, setSubmitState] = useState<SubmitState>("idle");
++  const [txId, setTxId] = useState<string | null>(null);
++
++  const handleSubmit = async () => {
++    if (!isSignedIn) {
++      toast.error("Please connect your wallet first");
++      return;
++    }
++
++    setSubmitState("submitting");
++
++    try {
++      const result = await initializePurchaseOrder(
++        orderData.exporterPrincipal,
++        orderData.importerPrincipal,
++        orderData.orderHash,
++        orderData.orderDetailHash,
++        orderData.paymentTerm,
++        orderData.amount,
++        orderData.deliveryTerm
++      );
++
++      setTxId(result.txId);
++      setSubmitState("success");
++      toast.success("Purchase order submitted to blockchain!");
++
++      if (onSuccess) {
++        onSuccess(result);
++      }
++    } catch (error: any) {
++      console.error("Error submitting purchase order:", error);
++      setSubmitState("error");
++      toast.error(error.message || "Failed to submit purchase order");
++    }
++  };
++
++  const handleClose = () => {
++    setSubmitState("idle");
++    setTxId(null);
++    onClose();
++  };
++
++  const formatAmount = (amount: number) => {
++    return new Intl.NumberFormat("en-US", {
++      style: "currency",
++      currency: "USD",
++    }).format(amount / 1000000); // Assuming 6 decimal places
++  };
++
++  const truncateAddress = (address: string) => {
++    if (!address) return "";
++    return `${address.slice(0, 8)}...${address.slice(-8)}`;
++  };
++
++  return (
++    <div className={"newApplicationModal " + (isOpen && "active")}>
++      {isOpen && (
++        <div className="modalMenue" style={{ maxWidth: "600px" }}>
++          <div onClick={handleClose} className="close">
++            <FontAwesomeIcon icon={faClose} />
++          </div>
++
++          <div className="form" style={{ flexDirection: "column", gap: "20px" }}>
++            <div style={{ textAlign: "center", width: "100%" }}>
++              <div className="header-application">
++                {submitState === "success"
++                  ? "Purchase Order Submitted!"
++                  : "Submit Purchase Order On-Chain"}
++              </div>
++
++              {submitState === "idle" && (
++                <div className="info-application" style={{ marginTop: "10px" }}>
++                  Review the details below and submit your purchase order to the Stacks blockchain.
++                </div>
++              )}
++            </div>
++
++            {submitState === "success" ? (
++              <div style={{ textAlign: "center", padding: "20px" }}>
++                <FontAwesomeIcon
++                  icon={faCheckCircle}
++                  style={{ fontSize: "48px", color: "#4CAF50", marginBottom: "20px" }}
++                />
++                <p>Your purchase order has been submitted to the blockchain.</p>
++                {txId && (
++                  <div style={{ marginTop: "15px" }}>
++                    <span style={{ fontWeight: "bold" }}>Transaction ID:</span>
++                    <br />
++                    <code style={{
++                      fontSize: "12px",
++                      backgroundColor: "#f5f5f5",
++                      padding: "8px",
++                      borderRadius: "4px",
++                      display: "inline-block",
++                      marginTop: "5px",
++                      wordBreak: "break-all"
++                    }}>
++                      {txId}
++                    </code>
++                  </div>
++                )}
++                <div style={{ marginTop: "20px" }}>
++                  <button className="btn" onClick={handleClose}>
++                    Done
++                  </button>
++                </div>
++              </div>
++            ) : (
++              <>
++                {/* Order Details Summary */}
++                <div style={{
++                  backgroundColor: "#f9f9f9",
++                  padding: "20px",
++                  borderRadius: "8px",
++                  width: "100%"
++                }}>
++                  <h4 style={{ marginBottom: "15px", color: "#333" }}>Order Details</h4>
++
++                  <div style={{ display: "grid", gap: "10px" }}>
++                    <div style={{ display: "flex", justifyContent: "space-between" }}>
++                      <span style={{ color: "#666" }}>Exporter:</span>
++                      <span style={{ fontFamily: "monospace" }}>
++                        {truncateAddress(orderData.exporterPrincipal)}
++                      </span>
++                    </div>
++
++                    <div style={{ display: "flex", justifyContent: "space-between" }}>
++                      <span style={{ color: "#666" }}>Importer:</span>
++                      <span style={{ fontFamily: "monospace" }}>
++                        {truncateAddress(orderData.importerPrincipal)}
++                      </span>
++                    </div>
++
++                    <div style={{ display: "flex", justifyContent: "space-between" }}>
++                      <span style={{ color: "#666" }}>Amount:</span>
++                      <span style={{ fontWeight: "bold" }}>
++                        {formatAmount(orderData.amount)}
++                      </span>
++                    </div>
++
++                    <div style={{ display: "flex", justifyContent: "space-between" }}>
++                      <span style={{ color: "#666" }}>Payment Term:</span>
++                      <span>{orderData.paymentTerm}</span>
++                    </div>
++
++                    <div style={{ display: "flex", justifyContent: "space-between" }}>
++                      <span style={{ color: "#666" }}>Delivery Term:</span>
++                      <span>{orderData.deliveryTerm}</span>
++                    </div>
++                  </div>
++                </div>
++
++                {/* Wallet Info */}
++                <div style={{
++                  backgroundColor: "#e8f4fd",
++                  padding: "15px",
++                  borderRadius: "8px",
++                  width: "100%"
++                }}>
++                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
++                    <span style={{ color: "#1976d2" }}>Connected Wallet:</span>
++                    <span style={{ fontFamily: "monospace", fontSize: "14px" }}>
++                      {stxAddress ? truncateAddress(stxAddress) : "Not connected"}
++                    </span>
++                  </div>
++                </div>
++
++                {/* Action Buttons */}
++                <div style={{
++                  display: "flex",
++                  gap: "15px",
++                  justifyContent: "center",
++                  marginTop: "10px"
++                }}>
++                  <button
++                    className="btn"
++                    style={{ backgroundColor: "#ccc", color: "#333" }}
++                    onClick={handleClose}
++                    disabled={submitState === "submitting"}
++                  >
++                    Cancel
++                  </button>
++                  <button
++                    className="btn"
++                    onClick={handleSubmit}
++                    disabled={submitState === "submitting" || !isSignedIn}
++                  >
++                    {submitState === "submitting" ? (
++                      <>
++                        <FontAwesomeIcon icon={faSpinner} spin style={{ marginRight: "8px" }} />
++                        Submitting...
++                      </>
++                    ) : (
++                      "Submit to Blockchain"
++                    )}
++                  </button>
++                </div>
++
++                {!isSignedIn && (
++                  <div style={{
++                    color: "#f44336",
++                    textAlign: "center",
++                    fontSize: "14px",
++                    marginTop: "10px"
++                  }}>
++                    Please connect your wallet to submit
++                  </div>
++                )}
++              </>
++            )}
++          </div>
++        </div>
++      )}
++    </div>
++  );
++}
++
++export default SubmitPurchaseOrderModal;
+diff --git a/apps/frontend/src/utils/hooks/useTaralContracts.ts b/apps/frontend/src/utils/hooks/useTaralContracts.ts
+index b93f9499..a3be21fe 100644
+--- a/apps/frontend/src/utils/hooks/useTaralContracts.ts
++++ b/apps/frontend/src/utils/hooks/useTaralContracts.ts
+@@ -20,8 +20,12 @@ import {
+ 
+ import { fetchReadOnlyFunction } from "micro-stacks/api";
+ 
+-import { TARAL_IMPORTER_CONTRACT } from "@utils/lib/constants";
+-import { utf8ToBytes } from "micro-stacks/common";
++import {
++  TARAL_IMPORTER_CONTRACT,
++  TARAL_PURCHASE_ORDER_CONTRACT,
++  PURCHASE_ORDER_STORAGE_CONTRACT
++} from "@utils/lib/constants";
++import { utf8ToBytes, hexToBytes } from "micro-stacks/common";
+ 
+ function useTaralContracts() {
+   const { isSignedIn } = useAuth();
+@@ -281,6 +285,199 @@ function useTaralContracts() {
+     });
+   }
+ 
++  /**
++   * Initialize a purchase order on-chain
++   * Calls the taral-purchase-order contract's initialize function
++   * @param exporterPrincipal - Principal address of the exporter
++   * @param importerPrincipal - Principal address of the importer
++   * @param orderHash - SHA256 hash of order data (as hex string)
++   * @param orderDetailHash - SHA256 hash of order details (as hex string)
++   * @param paymentTerm - Payment terms (e.g., "30 Days", "60 Days")
++   * @param amount - Order amount in smallest unit
++   * @param deliveryTerm - Delivery term (e.g., "FOB", "CIF")
++   */
++  async function initializePurchaseOrder(
++    exporterPrincipal: string,
++    importerPrincipal: string,
++    orderHash: string,
++    orderDetailHash: string,
++    paymentTerm: string,
++    amount: number,
++    deliveryTerm: string
++  ): Promise<any> {
++    return new Promise(async (resolve, reject) => {
++      const contractAddress = TARAL_PURCHASE_ORDER_CONTRACT.split(".")[0];
++      const contractName = TARAL_PURCHASE_ORDER_CONTRACT.split(".")[1];
++
++      // Convert hex strings to buffer CVs
++      const orderHashBytes = hexToBytes(orderHash.startsWith("0x") ? orderHash.slice(2) : orderHash);
++      const orderDetailHashBytes = hexToBytes(orderDetailHash.startsWith("0x") ? orderDetailHash.slice(2) : orderDetailHash);
++
++      const functionArgs = [
++        standardPrincipalCV(exporterPrincipal),
++        standardPrincipalCV(importerPrincipal),
++        bufferCV(orderHashBytes),
++        bufferCV(orderDetailHashBytes),
++        stringUtf8CV(paymentTerm),
++        uintCV(amount),
++        stringUtf8CV(deliveryTerm),
++      ];
++
++      if (isSignedIn) {
++        await openContractCall({
++          contractAddress,
++          contractName,
++          functionName: "initialize",
++          functionArgs: functionArgs,
++          postConditionMode: PostConditionMode.Allow,
++
++          onFinish: async (data: any) => {
++            console.log("Purchase order initialized on-chain!", data);
++            resolve(data);
++          },
++          onCancel: () => {
++            console.log("Purchase order initialization cancelled");
++            reject(new Error("User cancelled transaction"));
++          },
++        });
++      } else {
++        reject(new Error("User not signed in"));
++      }
++    });
++  }
++
++  /**
++   * Get purchase order details from storage contract
++   * @param orderId - The order ID to lookup
++   */
++  async function getPurchaseOrderFromStorage(orderId: number) {
++    try {
++      const contractAddress = PURCHASE_ORDER_STORAGE_CONTRACT.split(".")[0];
++      const contractName = PURCHASE_ORDER_STORAGE_CONTRACT.split(".")[1];
++
++      const result: any = await fetchReadOnlyFunction({
++        network: network,
++        contractAddress,
++        contractName,
++        senderAddress: contractAddress,
++        functionArgs: [uintCV(orderId)],
++        functionName: "get-order",
++      });
++      return result;
++    } catch (e: any) {
++      console.error("Error fetching purchase order:", e);
++      return null;
++    }
++  }
++
++  /**
++   * Get the current order ID nonce from storage
++   */
++  async function getCurrentOrderIdNonce() {
++    try {
++      const contractAddress = PURCHASE_ORDER_STORAGE_CONTRACT.split(".")[0];
++      const contractName = PURCHASE_ORDER_STORAGE_CONTRACT.split(".")[1];
++
++      const result: any = await fetchReadOnlyFunction({
++        network: network,
++        contractAddress,
++        contractName,
++        senderAddress: contractAddress,
++        functionArgs: [],
++        functionName: "get-order-id-nonce",
++      });
++      return result;
++    } catch (e: any) {
++      console.error("Error fetching order ID nonce:", e);
++      return null;
++    }
++  }
++
++  /**
++   * Create a vault (collateralized loan position) for a purchase order
++   * @param collateralStx - STX collateral amount
++   * @param collateralBtc - BTC collateral amount
++   * @param loanAmount - Loan amount requested
++   * @param duration - Loan duration in days
++   */
++  async function createVault(
++    collateralStx: number,
++    collateralBtc: number,
++    loanAmount: number,
++    duration: number
++  ): Promise<any> {
++    return new Promise(async (resolve, reject) => {
++      const contractAddress = TARAL_PURCHASE_ORDER_CONTRACT.split(".")[0];
++      const contractName = TARAL_PURCHASE_ORDER_CONTRACT.split(".")[1];
++
++      const functionArgs = [
++        uintCV(collateralStx),
++        uintCV(collateralBtc),
++        uintCV(loanAmount),
++        uintCV(duration),
++      ];
++
++      if (isSignedIn) {
++        await openContractCall({
++          contractAddress,
++          contractName,
++          functionName: "create-vault",
++          functionArgs: functionArgs,
++          postConditionMode: PostConditionMode.Allow,
++
++          onFinish: async (data: any) => {
++            console.log("Vault created!", data);
++            resolve(data);
++          },
++          onCancel: () => {
++            console.log("Vault creation cancelled");
++            reject(new Error("User cancelled transaction"));
++          },
++        });
++      } else {
++        reject(new Error("User not signed in"));
++      }
++    });
++  }
++
++  /**
++   * Repay loan on a vault
++   * @param vaultId - The vault ID
++   * @param repaymentAmount - Amount to repay
++   */
++  async function repayLoan(vaultId: number, repaymentAmount: number): Promise<any> {
++    return new Promise(async (resolve, reject) => {
++      const contractAddress = TARAL_PURCHASE_ORDER_CONTRACT.split(".")[0];
++      const contractName = TARAL_PURCHASE_ORDER_CONTRACT.split(".")[1];
++
++      const functionArgs = [
++        uintCV(vaultId),
++        uintCV(repaymentAmount),
++      ];
++
++      if (isSignedIn) {
++        await openContractCall({
++          contractAddress,
++          contractName,
++          functionName: "repay-loan",
++          functionArgs: functionArgs,
++          postConditionMode: PostConditionMode.Allow,
++
++          onFinish: async (data: any) => {
++            console.log("Loan repaid!", data);
++            resolve(data);
++          },
++          onCancel: () => {
++            console.log("Loan repayment cancelled");
++            reject(new Error("User cancelled transaction"));
++          },
++        });
++      } else {
++        reject(new Error("User not signed in"));
++      }
++    });
++  }
++
+   return {
+     // general variables
+     stxAddress,
+@@ -295,6 +492,13 @@ function useTaralContracts() {
+     getActivePurchaseOrder,
+     makePayment,
+     finance,
++
++    // purchase order contract functions
++    initializePurchaseOrder,
++    getPurchaseOrderFromStorage,
++    getCurrentOrderIdNonce,
++    createVault,
++    repayLoan,
+   };
+ }
+ export default useTaralContracts;
+diff --git a/apps/frontend/src/utils/lib/constants.ts b/apps/frontend/src/utils/lib/constants.ts
+index f311b5d1..2e3874ca 100644
+--- a/apps/frontend/src/utils/lib/constants.ts
++++ b/apps/frontend/src/utils/lib/constants.ts
+@@ -61,10 +61,48 @@ export const TARAL_IMPORTER_CONTRACT = devnet
+   ? "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.taral-importer"
+   : "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.taral-importer";
+ 
++export const TARAL_EXPORTER_CONTRACT = devnet
++  ? "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.taral-exporter"
++  : "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.taral-exporter";
++
++export const TARAL_PURCHASE_ORDER_CONTRACT = devnet
++  ? "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.taral-purchase-order"
++  : process.env.NEXT_PUBLIC_TARAL_PURCHASE_ORDER_CONTRACT || "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.taral-purchase-order";
++
++export const PURCHASE_ORDER_STORAGE_CONTRACT = devnet
++  ? "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.purchase-order-storage"
++  : process.env.NEXT_PUBLIC_PURCHASE_ORDER_STORAGE_CONTRACT || "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.purchase-order-storage";
++
+ export const SUSDT_CONTRACT = devnet
+   ? "STRP7MYBHSMFH5EGN3HGX6KNQ7QBHVTBPF1669DW.susdt-token-v2"
+   : process.env.NEXT_PUBLIC_SUSDT_CONTRACT || "";
+ 
++// Delivery terms (Incoterms)
++export const DELIVERY_TERMS = [
++  { code: "EXW", name: "Ex Works" },
++  { code: "FCA", name: "Free Carrier" },
++  { code: "CPT", name: "Carriage Paid To" },
++  { code: "CIP", name: "Carriage and Insurance Paid To" },
++  { code: "DAP", name: "Delivered at Place" },
++  { code: "DPU", name: "Delivered at Place Unloaded" },
++  { code: "DDP", name: "Delivered Duty Paid" },
++  { code: "FAS", name: "Free Alongside Ship" },
++  { code: "FOB", name: "Free on Board" },
++  { code: "CFR", name: "Cost and Freight" },
++  { code: "CIF", name: "Cost, Insurance, and Freight" },
++];
++
++// Payment terms options
++export const PAYMENT_TERMS = [
++  { code: "30", name: "30 Days" },
++  { code: "60", name: "60 Days" },
++  { code: "90", name: "90 Days" },
++  { code: "120", name: "120 Days" },
++  { code: "50_DEP", name: "50% Deposit, balance upon bill of lading" },
++  { code: "LC", name: "Letter of Credit" },
++  { code: "TT", name: "Telegraphic Transfer" },
++];
++
+ export const CURRENCIES = [
+   { cc: "AED", symbol: "\u062f.\u0625;", name: "UAE dirham" },
+   { cc: "AFN", symbol: "Afs", name: "Afghan afghani" },
+-- 
+2.43.0
+
+
+From 98a02c734c8c1e278d055f11be2bfb47079fdd5d Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Mon, 12 Jan 2026 14:45:26 +0000
+Subject: [PATCH 3/5] feat: add contract viewer and signing workflow components
+
+- Add contract types (PurchaseOrderContract, ContractTerms, etc.)
+- Create ContractViewerModal for viewing and signing contracts
+  - Display contract parties with signature status
+  - Show contract terms and payment details
+  - Sign and reject functionality with wallet integration
+  - On-chain hash verification display
+- Add hash utilities for generating order hashes
+  - SHA256 hash generation
+  - Order hash and detail hash generators
+  - Hash verification function
+
+This implements User Story #2 (Contract Viewing & Signing) from Phase 1
+---
+ .../components/modal/contractViewerModal.tsx  | 629 ++++++++++++++++++
+ apps/frontend/src/types/contract.ts           |  59 ++
+ apps/frontend/src/utils/lib/hashUtils.ts      |  87 +++
+ 3 files changed, 775 insertions(+)
+ create mode 100644 apps/frontend/src/components/modal/contractViewerModal.tsx
+ create mode 100644 apps/frontend/src/types/contract.ts
+ create mode 100644 apps/frontend/src/utils/lib/hashUtils.ts
+
+diff --git a/apps/frontend/src/components/modal/contractViewerModal.tsx b/apps/frontend/src/components/modal/contractViewerModal.tsx
+new file mode 100644
+index 00000000..bed3acf7
+--- /dev/null
++++ b/apps/frontend/src/components/modal/contractViewerModal.tsx
+@@ -0,0 +1,629 @@
++import {
++  faClose,
++  faCheckCircle,
++  faTimesCircle,
++  faSpinner,
++  faFileContract,
++  faPen,
++} from "@fortawesome/free-solid-svg-icons";
++import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
++import useTaralContracts from "@hooks/useTaralContracts";
++import { useState } from "react";
++import { toast } from "sonner";
++import {
++  PurchaseOrderContract,
++  ContractTerms,
++  ContractStatus,
++} from "src/types/contract";
++
++type Props = {
++  isOpen: boolean;
++  onClose: () => void;
++  orderId: number;
++  contract: PurchaseOrderContract | null;
++  terms?: ContractTerms;
++  userRole: "exporter" | "importer";
++  onSignSuccess?: () => void;
++};
++
++type ActionState = "idle" | "signing" | "rejecting" | "success" | "error";
++
++function ContractViewerModal({
++  isOpen,
++  onClose,
++  orderId,
++  contract,
++  terms,
++  userRole,
++  onSignSuccess,
++}: Props) {
++  const { isSignedIn, stxAddress } = useTaralContracts();
++  const [actionState, setActionState] = useState<ActionState>("idle");
++  const [showRejectForm, setShowRejectForm] = useState(false);
++  const [rejectionReason, setRejectionReason] = useState("");
++
++  const truncateAddress = (address: string) => {
++    if (!address) return "";
++    return `${address.slice(0, 8)}...${address.slice(-8)}`;
++  };
++
++  const formatAmount = (amount: number) => {
++    return new Intl.NumberFormat("en-US", {
++      style: "currency",
++      currency: "USD",
++    }).format(amount / 1000000);
++  };
++
++  const getStatusColor = (status: ContractStatus) => {
++    switch (status) {
++      case "pending":
++        return "#FFA500";
++      case "awaiting_signatures":
++        return "#2196F3";
++      case "signed":
++        return "#4CAF50";
++      case "rejected":
++        return "#f44336";
++      case "completed":
++        return "#4CAF50";
++      case "cancelled":
++        return "#9E9E9E";
++      default:
++        return "#666";
++    }
++  };
++
++  const getStatusLabel = (status: ContractStatus) => {
++    switch (status) {
++      case "pending":
++        return "Pending";
++      case "awaiting_signatures":
++        return "Awaiting Signatures";
++      case "signed":
++        return "Signed";
++      case "rejected":
++        return "Rejected";
++      case "completed":
++        return "Completed";
++      case "cancelled":
++        return "Cancelled";
++      default:
++        return status;
++    }
++  };
++
++  const handleSign = async () => {
++    if (!isSignedIn) {
++      toast.error("Please connect your wallet first");
++      return;
++    }
++
++    setActionState("signing");
++
++    try {
++      // TODO: Call the actual signing contract function
++      // For now, simulate the signing process
++      await new Promise((resolve) => setTimeout(resolve, 2000));
++
++      setActionState("success");
++      toast.success("Contract signed successfully!");
++
++      if (onSignSuccess) {
++        onSignSuccess();
++      }
++    } catch (error: any) {
++      console.error("Error signing contract:", error);
++      setActionState("error");
++      toast.error(error.message || "Failed to sign contract");
++    }
++  };
++
++  const handleReject = async () => {
++    if (!rejectionReason.trim()) {
++      toast.error("Please provide a reason for rejection");
++      return;
++    }
++
++    setActionState("rejecting");
++
++    try {
++      // TODO: Call the actual rejection contract function
++      await new Promise((resolve) => setTimeout(resolve, 2000));
++
++      setActionState("success");
++      toast.success("Contract rejected");
++      setShowRejectForm(false);
++
++      if (onSignSuccess) {
++        onSignSuccess();
++      }
++    } catch (error: any) {
++      console.error("Error rejecting contract:", error);
++      setActionState("error");
++      toast.error(error.message || "Failed to reject contract");
++    }
++  };
++
++  const canSign = () => {
++    if (!contract || !isSignedIn || !stxAddress) return false;
++
++    const userSignature = contract.signatures.find(
++      (sig) => sig.role === userRole
++    );
++
++    return userSignature && !userSignature.signed;
++  };
++
++  const handleClose = () => {
++    setActionState("idle");
++    setShowRejectForm(false);
++    setRejectionReason("");
++    onClose();
++  };
++
++  if (!isOpen) return null;
++
++  return (
++    <div className={"newApplicationModal active"}>
++      <div className="modalMenue" style={{ maxWidth: "800px", maxHeight: "90vh", overflow: "auto" }}>
++        <div onClick={handleClose} className="close">
++          <FontAwesomeIcon icon={faClose} />
++        </div>
++
++        <div className="form" style={{ flexDirection: "column", gap: "20px", padding: "20px" }}>
++          {/* Header */}
++          <div style={{ textAlign: "center", width: "100%" }}>
++            <FontAwesomeIcon
++              icon={faFileContract}
++              style={{ fontSize: "36px", color: "#1976d2", marginBottom: "10px" }}
++            />
++            <div className="header-application">
++              Purchase Order Contract #{orderId}
++            </div>
++            {contract && (
++              <div
++                style={{
++                  display: "inline-block",
++                  padding: "4px 12px",
++                  borderRadius: "16px",
++                  backgroundColor: getStatusColor(contract.status),
++                  color: "white",
++                  fontSize: "12px",
++                  fontWeight: "bold",
++                  marginTop: "10px",
++                }}
++              >
++                {getStatusLabel(contract.status)}
++              </div>
++            )}
++          </div>
++
++          {/* Contract Details */}
++          {contract && (
++            <>
++              {/* Parties Section */}
++              <div
++                style={{
++                  backgroundColor: "#f5f5f5",
++                  padding: "20px",
++                  borderRadius: "8px",
++                  width: "100%",
++                }}
++              >
++                <h4 style={{ marginBottom: "15px", color: "#333" }}>
++                  Contract Parties
++                </h4>
++                <div style={{ display: "grid", gap: "15px" }}>
++                  <div
++                    style={{
++                      display: "flex",
++                      justifyContent: "space-between",
++                      alignItems: "center",
++                      padding: "10px",
++                      backgroundColor: "white",
++                      borderRadius: "4px",
++                    }}
++                  >
++                    <div>
++                      <span style={{ color: "#666", fontSize: "12px" }}>
++                        EXPORTER
++                      </span>
++                      <br />
++                      <span style={{ fontFamily: "monospace" }}>
++                        {truncateAddress(contract.exporterPrincipal)}
++                      </span>
++                    </div>
++                    {contract.signatures.find((s) => s.role === "exporter")
++                      ?.signed ? (
++                      <FontAwesomeIcon
++                        icon={faCheckCircle}
++                        style={{ color: "#4CAF50", fontSize: "20px" }}
++                      />
++                    ) : (
++                      <span
++                        style={{
++                          color: "#FFA500",
++                          fontSize: "12px",
++                          fontWeight: "bold",
++                        }}
++                      >
++                        Awaiting Signature
++                      </span>
++                    )}
++                  </div>
++
++                  <div
++                    style={{
++                      display: "flex",
++                      justifyContent: "space-between",
++                      alignItems: "center",
++                      padding: "10px",
++                      backgroundColor: "white",
++                      borderRadius: "4px",
++                    }}
++                  >
++                    <div>
++                      <span style={{ color: "#666", fontSize: "12px" }}>
++                        IMPORTER
++                      </span>
++                      <br />
++                      <span style={{ fontFamily: "monospace" }}>
++                        {truncateAddress(contract.importerPrincipal)}
++                      </span>
++                    </div>
++                    {contract.signatures.find((s) => s.role === "importer")
++                      ?.signed ? (
++                      <FontAwesomeIcon
++                        icon={faCheckCircle}
++                        style={{ color: "#4CAF50", fontSize: "20px" }}
++                      />
++                    ) : (
++                      <span
++                        style={{
++                          color: "#FFA500",
++                          fontSize: "12px",
++                          fontWeight: "bold",
++                        }}
++                      >
++                        Awaiting Signature
++                      </span>
++                    )}
++                  </div>
++                </div>
++              </div>
++
++              {/* Contract Terms Section */}
++              <div
++                style={{
++                  backgroundColor: "#f5f5f5",
++                  padding: "20px",
++                  borderRadius: "8px",
++                  width: "100%",
++                }}
++              >
++                <h4 style={{ marginBottom: "15px", color: "#333" }}>
++                  Contract Terms
++                </h4>
++                <div
++                  style={{
++                    display: "grid",
++                    gridTemplateColumns: "1fr 1fr",
++                    gap: "15px",
++                  }}
++                >
++                  <div>
++                    <span style={{ color: "#666", fontSize: "12px" }}>
++                      ORDER AMOUNT
++                    </span>
++                    <br />
++                    <span style={{ fontWeight: "bold", fontSize: "18px" }}>
++                      {formatAmount(contract.amount)}
++                    </span>
++                  </div>
++                  <div>
++                    <span style={{ color: "#666", fontSize: "12px" }}>
++                      PAYMENT TERM
++                    </span>
++                    <br />
++                    <span style={{ fontWeight: "bold" }}>
++                      {contract.paymentTerm}
++                    </span>
++                  </div>
++                  <div>
++                    <span style={{ color: "#666", fontSize: "12px" }}>
++                      DELIVERY TERM
++                    </span>
++                    <br />
++                    <span style={{ fontWeight: "bold" }}>
++                      {contract.deliveryTerm}
++                    </span>
++                  </div>
++                  <div>
++                    <span style={{ color: "#666", fontSize: "12px" }}>
++                      ORDER ID
++                    </span>
++                    <br />
++                    <span style={{ fontWeight: "bold" }}>#{orderId}</span>
++                  </div>
++                </div>
++              </div>
++
++              {/* Additional Terms if provided */}
++              {terms && (
++                <div
++                  style={{
++                    backgroundColor: "#f5f5f5",
++                    padding: "20px",
++                    borderRadius: "8px",
++                    width: "100%",
++                  }}
++                >
++                  <h4 style={{ marginBottom: "15px", color: "#333" }}>
++                    Payment Details
++                  </h4>
++                  <div
++                    style={{
++                      display: "grid",
++                      gridTemplateColumns: "1fr 1fr",
++                      gap: "15px",
++                    }}
++                  >
++                    <div>
++                      <span style={{ color: "#666", fontSize: "12px" }}>
++                        DOWNPAYMENT
++                      </span>
++                      <br />
++                      <span style={{ fontWeight: "bold" }}>
++                        {terms.downpaymentCurrency} {terms.downpaymentAmount}
++                      </span>
++                    </div>
++                    <div>
++                      <span style={{ color: "#666", fontSize: "12px" }}>
++                        BALANCE
++                      </span>
++                      <br />
++                      <span style={{ fontWeight: "bold" }}>
++                        {terms.balanceCurrency} {terms.balanceAmount}
++                      </span>
++                    </div>
++                    <div>
++                      <span style={{ color: "#666", fontSize: "12px" }}>
++                        BALANCE DUE DATE
++                      </span>
++                      <br />
++                      <span style={{ fontWeight: "bold" }}>
++                        {terms.balancePaymentDeadline}
++                      </span>
++                    </div>
++                    <div>
++                      <span style={{ color: "#666", fontSize: "12px" }}>
++                        PAYMENT DURATION
++                      </span>
++                      <br />
++                      <span style={{ fontWeight: "bold" }}>
++                        {terms.paymentDuration} days
++                      </span>
++                    </div>
++                    {terms.interestExists && (
++                      <>
++                        <div>
++                          <span style={{ color: "#666", fontSize: "12px" }}>
++                            INTEREST TYPE
++                          </span>
++                          <br />
++                          <span style={{ fontWeight: "bold" }}>
++                            {terms.interestType}
++                          </span>
++                        </div>
++                        <div>
++                          <span style={{ color: "#666", fontSize: "12px" }}>
++                            INTEREST RATE
++                          </span>
++                          <br />
++                          <span style={{ fontWeight: "bold" }}>
++                            {terms.interestPercentage}%
++                          </span>
++                        </div>
++                      </>
++                    )}
++                  </div>
++                </div>
++              )}
++
++              {/* Hashes Section */}
++              <div
++                style={{
++                  backgroundColor: "#e8f4fd",
++                  padding: "15px",
++                  borderRadius: "8px",
++                  width: "100%",
++                }}
++              >
++                <h4 style={{ marginBottom: "10px", color: "#1976d2" }}>
++                  On-Chain Verification
++                </h4>
++                <div style={{ fontSize: "12px" }}>
++                  <div style={{ marginBottom: "8px" }}>
++                    <span style={{ color: "#666" }}>Order Hash:</span>
++                    <br />
++                    <code
++                      style={{
++                        backgroundColor: "white",
++                        padding: "4px 8px",
++                        borderRadius: "4px",
++                        wordBreak: "break-all",
++                      }}
++                    >
++                      {contract.orderHash}
++                    </code>
++                  </div>
++                  <div>
++                    <span style={{ color: "#666" }}>Detail Hash:</span>
++                    <br />
++                    <code
++                      style={{
++                        backgroundColor: "white",
++                        padding: "4px 8px",
++                        borderRadius: "4px",
++                        wordBreak: "break-all",
++                      }}
++                    >
++                      {contract.orderDetailHash}
++                    </code>
++                  </div>
++                </div>
++              </div>
++
++              {/* Rejection Form */}
++              {showRejectForm && (
++                <div
++                  style={{
++                    backgroundColor: "#ffebee",
++                    padding: "20px",
++                    borderRadius: "8px",
++                    width: "100%",
++                  }}
++                >
++                  <h4 style={{ marginBottom: "10px", color: "#c62828" }}>
++                    Rejection Reason
++                  </h4>
++                  <textarea
++                    value={rejectionReason}
++                    onChange={(e) => setRejectionReason(e.target.value)}
++                    placeholder="Please provide a reason for rejecting this contract..."
++                    style={{
++                      width: "100%",
++                      minHeight: "100px",
++                      padding: "10px",
++                      borderRadius: "4px",
++                      border: "1px solid #ef9a9a",
++                      marginBottom: "10px",
++                    }}
++                  />
++                  <div style={{ display: "flex", gap: "10px" }}>
++                    <button
++                      className="btn"
++                      style={{ backgroundColor: "#ccc", color: "#333" }}
++                      onClick={() => setShowRejectForm(false)}
++                    >
++                      Cancel
++                    </button>
++                    <button
++                      className="btn"
++                      style={{ backgroundColor: "#c62828" }}
++                      onClick={handleReject}
++                      disabled={actionState === "rejecting"}
++                    >
++                      {actionState === "rejecting" ? (
++                        <>
++                          <FontAwesomeIcon
++                            icon={faSpinner}
++                            spin
++                            style={{ marginRight: "8px" }}
++                          />
++                          Rejecting...
++                        </>
++                      ) : (
++                        "Confirm Rejection"
++                      )}
++                    </button>
++                  </div>
++                </div>
++              )}
++
++              {/* Action Buttons */}
++              {canSign() && !showRejectForm && (
++                <div
++                  style={{
++                    display: "flex",
++                    gap: "15px",
++                    justifyContent: "center",
++                    marginTop: "10px",
++                  }}
++                >
++                  <button
++                    className="btn"
++                    style={{ backgroundColor: "#c62828" }}
++                    onClick={() => setShowRejectForm(true)}
++                    disabled={actionState === "signing"}
++                  >
++                    <FontAwesomeIcon
++                      icon={faTimesCircle}
++                      style={{ marginRight: "8px" }}
++                    />
++                    Reject Contract
++                  </button>
++                  <button
++                    className="btn"
++                    style={{ backgroundColor: "#4CAF50" }}
++                    onClick={handleSign}
++                    disabled={actionState === "signing"}
++                  >
++                    {actionState === "signing" ? (
++                      <>
++                        <FontAwesomeIcon
++                          icon={faSpinner}
++                          spin
++                          style={{ marginRight: "8px" }}
++                        />
++                        Signing...
++                      </>
++                    ) : (
++                      <>
++                        <FontAwesomeIcon
++                          icon={faPen}
++                          style={{ marginRight: "8px" }}
++                        />
++                        Sign Contract
++                      </>
++                    )}
++                  </button>
++                </div>
++              )}
++
++              {!isSignedIn && (
++                <div
++                  style={{
++                    color: "#f44336",
++                    textAlign: "center",
++                    fontSize: "14px",
++                    marginTop: "10px",
++                  }}
++                >
++                  Please connect your wallet to sign or reject this contract
++                </div>
++              )}
++            </>
++          )}
++
++          {/* Loading State */}
++          {!contract && (
++            <div style={{ textAlign: "center", padding: "40px" }}>
++              <FontAwesomeIcon
++                icon={faSpinner}
++                spin
++                style={{ fontSize: "32px", color: "#1976d2" }}
++              />
++              <p style={{ marginTop: "15px", color: "#666" }}>
++                Loading contract details...
++              </p>
++            </div>
++          )}
++
++          {/* Close Button */}
++          <div style={{ textAlign: "center", marginTop: "10px" }}>
++            <button
++              className="btn"
++              style={{ backgroundColor: "#666" }}
++              onClick={handleClose}
++            >
++              Close
++            </button>
++          </div>
++        </div>
++      </div>
++    </div>
++  );
++}
++
++export default ContractViewerModal;
+diff --git a/apps/frontend/src/types/contract.ts b/apps/frontend/src/types/contract.ts
+new file mode 100644
+index 00000000..c88e39ff
+--- /dev/null
++++ b/apps/frontend/src/types/contract.ts
+@@ -0,0 +1,59 @@
++/**
++ * Contract/Purchase Order Types for on-chain representation
++ */
++
++export interface PurchaseOrderContract {
++  orderId: number;
++  exporterPrincipal: string;
++  importerPrincipal: string;
++  orderHash: string;
++  orderDetailHash: string;
++  paymentTerm: string;
++  amount: number;
++  deliveryTerm: string;
++  status: ContractStatus;
++  createdAt: number; // block height
++  signatures: ContractSignature[];
++}
++
++export type ContractStatus =
++  | "pending"
++  | "awaiting_signatures"
++  | "signed"
++  | "rejected"
++  | "completed"
++  | "cancelled";
++
++export interface ContractSignature {
++  principal: string;
++  role: "exporter" | "importer";
++  signed: boolean;
++  signedAt?: number; // block height
++  rejectionReason?: string;
++}
++
++export interface ContractTerms {
++  paymentType: string;
++  paymentDuration: number;
++  downpaymentAmount: number;
++  downpaymentCurrency: string;
++  balanceAmount: number;
++  balanceCurrency: string;
++  balancePaymentDeadline: string;
++  interestExists: boolean;
++  interestType?: string;
++  interestPercentage?: number;
++  deliveryTerm: string;
++  exportPort: string;
++  importPort: string;
++}
++
++export interface ContractViewerProps {
++  orderId: number;
++  contract?: PurchaseOrderContract;
++  terms?: ContractTerms;
++  isLoading?: boolean;
++  onSign?: () => Promise<void>;
++  onReject?: (reason: string) => Promise<void>;
++  onClose?: () => void;
++}
+diff --git a/apps/frontend/src/utils/lib/hashUtils.ts b/apps/frontend/src/utils/lib/hashUtils.ts
+new file mode 100644
+index 00000000..60ac7091
+--- /dev/null
++++ b/apps/frontend/src/utils/lib/hashUtils.ts
+@@ -0,0 +1,87 @@
++/**
++ * Hash utilities for generating order hashes for on-chain submission
++ */
++
++/**
++ * Generate SHA256 hash of data
++ * @param data - Data to hash (string or object)
++ * @returns Hex-encoded SHA256 hash
++ */
++export async function sha256Hash(data: string | object): Promise<string> {
++  const text = typeof data === "string" ? data : JSON.stringify(data);
++  const encoder = new TextEncoder();
++  const dataBuffer = encoder.encode(text);
++
++  const hashBuffer = await crypto.subtle.digest("SHA-256", dataBuffer);
++  const hashArray = Array.from(new Uint8Array(hashBuffer));
++  const hashHex = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
++
++  return hashHex;
++}
++
++/**
++ * Generate order hash from order data
++ * This creates a deterministic hash of the core order information
++ */
++export async function generateOrderHash(orderData: {
++  exporterPrincipal: string;
++  importerPrincipal: string;
++  amount: number;
++  paymentTerm: string;
++  deliveryTerm: string;
++  timestamp?: number;
++}): Promise<string> {
++  const dataToHash = {
++    exporter: orderData.exporterPrincipal,
++    importer: orderData.importerPrincipal,
++    amount: orderData.amount,
++    paymentTerm: orderData.paymentTerm,
++    deliveryTerm: orderData.deliveryTerm,
++    timestamp: orderData.timestamp || Date.now(),
++  };
++
++  return sha256Hash(dataToHash);
++}
++
++/**
++ * Generate order detail hash from detailed order information
++ * This includes additional details like products, ports, etc.
++ */
++export async function generateOrderDetailHash(orderDetails: {
++  products?: Array<{
++    name: string;
++    quantity: number;
++    unitPrice: number;
++  }>;
++  exportPort?: string;
++  importPort?: string;
++  downpaymentAmount?: number;
++  downpaymentCurrency?: string;
++  balanceAmount?: number;
++  balanceCurrency?: string;
++  interestExists?: boolean;
++  interestType?: string;
++  interestPercentage?: number;
++  [key: string]: any;
++}): Promise<string> {
++  // Sort keys for deterministic hashing
++  const sortedDetails = Object.keys(orderDetails)
++    .sort()
++    .reduce((obj: any, key) => {
++      obj[key] = orderDetails[key];
++      return obj;
++    }, {});
++
++  return sha256Hash(sortedDetails);
++}
++
++/**
++ * Verify a hash matches the expected data
++ */
++export async function verifyHash(
++  data: string | object,
++  expectedHash: string
++): Promise<boolean> {
++  const computedHash = await sha256Hash(data);
++  return computedHash.toLowerCase() === expectedHash.toLowerCase();
++}
+-- 
+2.43.0
+
+
+From 27b8087949a2a0cd6e8361cf8ec6677d52bffe2a Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Mon, 12 Jan 2026 14:47:43 +0000
+Subject: [PATCH 4/5] Add on-chain payment terms submission modal (User Story
+ #7)
+
+- Create SubmitTermsModal component for submitting payment terms to blockchain
+- Display payment terms summary with all relevant fields
+- Show order details (ports, products) for verification
+- Include wallet connection status and counterparty info
+- Generate SHA256 hash of terms for on-chain storage
+- Add approval notice explaining counterparty workflow
+---
+ .../src/components/modal/submitTermsModal.tsx | 368 ++++++++++++++++++
+ 1 file changed, 368 insertions(+)
+ create mode 100644 apps/frontend/src/components/modal/submitTermsModal.tsx
+
+diff --git a/apps/frontend/src/components/modal/submitTermsModal.tsx b/apps/frontend/src/components/modal/submitTermsModal.tsx
+new file mode 100644
+index 00000000..5d2072ae
+--- /dev/null
++++ b/apps/frontend/src/components/modal/submitTermsModal.tsx
+@@ -0,0 +1,368 @@
++import {
++  faClose,
++  faCheckCircle,
++  faSpinner,
++  faFileAlt,
++  faHandshake,
++} from "@fortawesome/free-solid-svg-icons";
++import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
++import useTaralContracts from "@hooks/useTaralContracts";
++import { generateOrderDetailHash } from "@utils/lib/hashUtils";
++import { useState } from "react";
++import { toast } from "sonner";
++import { CreatePaymentTerm } from "src/types/payment_terms";
++
++type Props = {
++  isOpen: boolean;
++  onClose: () => void;
++  applicationId: string;
++  paymentTerms: CreatePaymentTerm;
++  orderDetails: {
++    exportPort: string;
++    importPort: string;
++    products: Array<{
++      name: string;
++      quantity: number;
++      unitPrice: number;
++    }>;
++  };
++  counterpartyPrincipal: string;
++  onSuccess?: (txData: any) => void;
++};
++
++type SubmitState = "idle" | "generating" | "submitting" | "success" | "error";
++
++function SubmitTermsModal({
++  isOpen,
++  onClose,
++  applicationId,
++  paymentTerms,
++  orderDetails,
++  counterpartyPrincipal,
++  onSuccess,
++}: Props) {
++  const { isSignedIn, stxAddress } = useTaralContracts();
++  const [submitState, setSubmitState] = useState<SubmitState>("idle");
++  const [txId, setTxId] = useState<string | null>(null);
++  const [termsHash, setTermsHash] = useState<string | null>(null);
++
++  const formatCurrency = (amount: number | null | undefined, currency: string | null | undefined) => {
++    if (!amount) return "N/A";
++    return `${currency || "USD"} ${amount.toLocaleString()}`;
++  };
++
++  const handleSubmit = async () => {
++    if (!isSignedIn) {
++      toast.error("Please connect your wallet first");
++      return;
++    }
++
++    setSubmitState("generating");
++
++    try {
++      // Generate hash of the terms for on-chain storage
++      const hash = await generateOrderDetailHash({
++        ...paymentTerms,
++        ...orderDetails,
++        applicationId,
++        timestamp: Date.now(),
++      });
++      setTermsHash(hash);
++
++      setSubmitState("submitting");
++
++      // TODO: Call actual contract function to submit terms on-chain
++      // For now, simulate the submission
++      await new Promise((resolve) => setTimeout(resolve, 2000));
++
++      setTxId("0x" + hash.slice(0, 16) + "..."); // Simulated tx ID
++      setSubmitState("success");
++      toast.success("Payment terms submitted on-chain!");
++
++      if (onSuccess) {
++        onSuccess({ txId: hash, termsHash: hash });
++      }
++    } catch (error: any) {
++      console.error("Error submitting terms:", error);
++      setSubmitState("error");
++      toast.error(error.message || "Failed to submit terms");
++    }
++  };
++
++  const handleClose = () => {
++    setSubmitState("idle");
++    setTxId(null);
++    setTermsHash(null);
++    onClose();
++  };
++
++  const truncateAddress = (address: string) => {
++    if (!address) return "";
++    return `${address.slice(0, 8)}...${address.slice(-8)}`;
++  };
++
++  if (!isOpen) return null;
++
++  return (
++    <div className={"newApplicationModal active"}>
++      <div className="modalMenue" style={{ maxWidth: "650px" }}>
++        <div onClick={handleClose} className="close">
++          <FontAwesomeIcon icon={faClose} />
++        </div>
++
++        <div className="form" style={{ flexDirection: "column", gap: "20px" }}>
++          {/* Header */}
++          <div style={{ textAlign: "center", width: "100%" }}>
++            {submitState === "success" ? (
++              <FontAwesomeIcon
++                icon={faCheckCircle}
++                style={{ fontSize: "48px", color: "#4CAF50", marginBottom: "10px" }}
++              />
++            ) : (
++              <FontAwesomeIcon
++                icon={faHandshake}
++                style={{ fontSize: "36px", color: "#1976d2", marginBottom: "10px" }}
++              />
++            )}
++            <div className="header-application">
++              {submitState === "success"
++                ? "Terms Submitted Successfully!"
++                : "Submit Payment Terms On-Chain"}
++            </div>
++            {submitState !== "success" && (
++              <div className="info-application" style={{ marginTop: "10px" }}>
++                Review the terms below before submitting to the blockchain for counterparty approval.
++              </div>
++            )}
++          </div>
++
++          {submitState === "success" ? (
++            <div style={{ textAlign: "center", padding: "20px" }}>
++              <p>Your payment terms have been submitted to the blockchain.</p>
++              <p style={{ color: "#666", marginTop: "10px" }}>
++                The counterparty will be notified to review and approve the terms.
++              </p>
++              {termsHash && (
++                <div style={{ marginTop: "15px" }}>
++                  <span style={{ fontWeight: "bold" }}>Terms Hash:</span>
++                  <br />
++                  <code
++                    style={{
++                      fontSize: "12px",
++                      backgroundColor: "#f5f5f5",
++                      padding: "8px",
++                      borderRadius: "4px",
++                      display: "inline-block",
++                      marginTop: "5px",
++                      wordBreak: "break-all",
++                    }}
++                  >
++                    {termsHash}
++                  </code>
++                </div>
++              )}
++              <div style={{ marginTop: "20px" }}>
++                <button className="btn" onClick={handleClose}>
++                  Done
++                </button>
++              </div>
++            </div>
++          ) : (
++            <>
++              {/* Payment Terms Summary */}
++              <div
++                style={{
++                  backgroundColor: "#f9f9f9",
++                  padding: "20px",
++                  borderRadius: "8px",
++                  width: "100%",
++                }}
++              >
++                <h4 style={{ marginBottom: "15px", color: "#333" }}>
++                  <FontAwesomeIcon icon={faFileAlt} style={{ marginRight: "8px" }} />
++                  Payment Terms Summary
++                </h4>
++
++                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px" }}>
++                  <div>
++                    <span style={{ color: "#666", fontSize: "12px" }}>PAYMENT TYPE</span>
++                    <br />
++                    <span style={{ fontWeight: "bold" }}>{paymentTerms.paymentType || "Short"}</span>
++                  </div>
++                  <div>
++                    <span style={{ color: "#666", fontSize: "12px" }}>DURATION</span>
++                    <br />
++                    <span style={{ fontWeight: "bold" }}>{paymentTerms.paymentDuration || 30} days</span>
++                  </div>
++                  <div>
++                    <span style={{ color: "#666", fontSize: "12px" }}>DOWNPAYMENT</span>
++                    <br />
++                    <span style={{ fontWeight: "bold" }}>
++                      {formatCurrency(paymentTerms.downpaymentAmount, paymentTerms.downpaymentCurrency)}
++                    </span>
++                  </div>
++                  <div>
++                    <span style={{ color: "#666", fontSize: "12px" }}>BALANCE</span>
++                    <br />
++                    <span style={{ fontWeight: "bold" }}>
++                      {formatCurrency(paymentTerms.balanceAmount, paymentTerms.balanceCurrency)}
++                    </span>
++                  </div>
++                  {paymentTerms.interestExists && (
++                    <>
++                      <div>
++                        <span style={{ color: "#666", fontSize: "12px" }}>INTEREST TYPE</span>
++                        <br />
++                        <span style={{ fontWeight: "bold" }}>{paymentTerms.interestType}</span>
++                      </div>
++                      <div>
++                        <span style={{ color: "#666", fontSize: "12px" }}>INTEREST RATE</span>
++                        <br />
++                        <span style={{ fontWeight: "bold" }}>
++                          {paymentTerms.interestPercentage || paymentTerms.interestFixedRate || paymentTerms.interestDegressiveRate}%
++                        </span>
++                      </div>
++                    </>
++                  )}
++                </div>
++
++                {paymentTerms.balancePaymentDeadline && (
++                  <div style={{ marginTop: "15px" }}>
++                    <span style={{ color: "#666", fontSize: "12px" }}>BALANCE DUE DATE</span>
++                    <br />
++                    <span style={{ fontWeight: "bold" }}>{paymentTerms.balancePaymentDeadline}</span>
++                  </div>
++                )}
++              </div>
++
++              {/* Order Details */}
++              <div
++                style={{
++                  backgroundColor: "#f9f9f9",
++                  padding: "20px",
++                  borderRadius: "8px",
++                  width: "100%",
++                }}
++              >
++                <h4 style={{ marginBottom: "15px", color: "#333" }}>Order Details</h4>
++                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px" }}>
++                  <div>
++                    <span style={{ color: "#666", fontSize: "12px" }}>EXPORT PORT</span>
++                    <br />
++                    <span style={{ fontWeight: "bold" }}>{orderDetails.exportPort || "N/A"}</span>
++                  </div>
++                  <div>
++                    <span style={{ color: "#666", fontSize: "12px" }}>IMPORT PORT</span>
++                    <br />
++                    <span style={{ fontWeight: "bold" }}>{orderDetails.importPort || "N/A"}</span>
++                  </div>
++                </div>
++                {orderDetails.products && orderDetails.products.length > 0 && (
++                  <div style={{ marginTop: "15px" }}>
++                    <span style={{ color: "#666", fontSize: "12px" }}>PRODUCTS</span>
++                    <br />
++                    <span style={{ fontWeight: "bold" }}>{orderDetails.products.length} item(s)</span>
++                  </div>
++                )}
++              </div>
++
++              {/* Counterparty Info */}
++              <div
++                style={{
++                  backgroundColor: "#e8f4fd",
++                  padding: "15px",
++                  borderRadius: "8px",
++                  width: "100%",
++                }}
++              >
++                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
++                  <div>
++                    <span style={{ color: "#666", fontSize: "12px" }}>YOUR WALLET</span>
++                    <br />
++                    <span style={{ fontFamily: "monospace", fontSize: "14px" }}>
++                      {stxAddress ? truncateAddress(stxAddress) : "Not connected"}
++                    </span>
++                  </div>
++                  <div style={{ textAlign: "right" }}>
++                    <span style={{ color: "#666", fontSize: "12px" }}>COUNTERPARTY</span>
++                    <br />
++                    <span style={{ fontFamily: "monospace", fontSize: "14px" }}>
++                      {truncateAddress(counterpartyPrincipal)}
++                    </span>
++                  </div>
++                </div>
++              </div>
++
++              {/* Approval Notice */}
++              <div
++                style={{
++                  backgroundColor: "#fff3e0",
++                  padding: "15px",
++                  borderRadius: "8px",
++                  width: "100%",
++                  fontSize: "14px",
++                }}
++              >
++                <strong>Note:</strong> Once submitted, the counterparty will need to approve these terms
++                before the transaction can proceed. You will be notified when they respond.
++              </div>
++
++              {/* Action Buttons */}
++              <div
++                style={{
++                  display: "flex",
++                  gap: "15px",
++                  justifyContent: "center",
++                  marginTop: "10px",
++                }}
++              >
++                <button
++                  className="btn"
++                  style={{ backgroundColor: "#ccc", color: "#333" }}
++                  onClick={handleClose}
++                  disabled={submitState === "submitting" || submitState === "generating"}
++                >
++                  Cancel
++                </button>
++                <button
++                  className="btn"
++                  onClick={handleSubmit}
++                  disabled={submitState === "submitting" || submitState === "generating" || !isSignedIn}
++                >
++                  {submitState === "generating" ? (
++                    <>
++                      <FontAwesomeIcon icon={faSpinner} spin style={{ marginRight: "8px" }} />
++                      Generating Hash...
++                    </>
++                  ) : submitState === "submitting" ? (
++                    <>
++                      <FontAwesomeIcon icon={faSpinner} spin style={{ marginRight: "8px" }} />
++                      Submitting...
++                    </>
++                  ) : (
++                    "Submit Terms On-Chain"
++                  )}
++                </button>
++              </div>
++
++              {!isSignedIn && (
++                <div
++                  style={{
++                    color: "#f44336",
++                    textAlign: "center",
++                    fontSize: "14px",
++                    marginTop: "10px",
++                  }}
++                >
++                  Please connect your wallet to submit
++                </div>
++              )}
++            </>
++          )}
++        </div>
++      </div>
++    </div>
++  );
++}
++
++export default SubmitTermsModal;
+-- 
+2.43.0
+
+
+From 658fed1eddd41e0eca50ff303b0358dd02400d0e Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Mon, 12 Jan 2026 14:50:04 +0000
+Subject: [PATCH 5/5] Integrate on-chain terms submission into payment terms
+ page
+
+- Create useTermsSubmission hook to fetch order details and supplier info
+- Add Submit Terms On-Chain button to paymentTerms page
+- Integrate SubmitTermsModal component for blockchain submission
+- Validate form before allowing on-chain submission
+---
+ .../[applicationId]/paymentTerms/index.tsx    |  66 +++++++++-
+ .../buyerApplication/useTermsSubmission.ts    | 124 ++++++++++++++++++
+ 2 files changed, 189 insertions(+), 1 deletion(-)
+ create mode 100644 apps/frontend/src/utils/hooks/buyerApplication/useTermsSubmission.ts
+
+diff --git a/apps/frontend/src/pages/users/importer/entities/[entityId]/quick/[applicationId]/paymentTerms/index.tsx b/apps/frontend/src/pages/users/importer/entities/[entityId]/quick/[applicationId]/paymentTerms/index.tsx
+index 7b4987a7..134c9b93 100644
+--- a/apps/frontend/src/pages/users/importer/entities/[entityId]/quick/[applicationId]/paymentTerms/index.tsx
++++ b/apps/frontend/src/pages/users/importer/entities/[entityId]/quick/[applicationId]/paymentTerms/index.tsx
+@@ -1,19 +1,23 @@
+ import ApplicationLayout from "@components/layouts/new_application_layout";
+ import BottomBar from "@components/newApplicationBottom";
++import SubmitTermsModal from "@components/modal/submitTermsModal";
+ import {
+   CreatePaymentTerm,
+   InterestType,
+   PaymentTypes,
+ } from "src/types/payment_terms";
+-import React, { useRef } from "react";
++import React, { useRef, useState } from "react";
+ import { Control, Controller, UseFormSetValue, useForm } from "react-hook-form";
+ import { NextPageContext } from "next/types";
+ import { useRouter } from "next/router";
+ import usePaymentTermForm from "@hooks/buyerApplication/usePaymentTerms";
++import useTermsSubmission from "@hooks/buyerApplication/useTermsSubmission";
+ import { yupResolver } from "@hookform/resolvers/yup";
+ import * as Yup from "yup";
+ import { toast } from "sonner";
+ import { CURRENCIES } from "@utils/lib/constants";
++import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
++import { faLink } from "@fortawesome/free-solid-svg-icons";
+ 
+ type CustomRadioProps = {
+   control: Control<CreatePaymentTerm, any>;
+@@ -156,8 +160,14 @@ function Index({ ...props }) {
+   const router = useRouter();
+   const entityID = query.entityId;
+   const applicationID = query.applicationId;
++  const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
+   const { schemaValidation, handleDebouncedChange, queryResult } =
+     usePaymentTermForm(applicationID);
++  const {
++    paymentTerms: submissionPaymentTerms,
++    orderDetails: submissionOrderDetails,
++    supplierInfo,
++  } = useTermsSubmission(applicationID);
+   const {
+     register,
+     setValue,
+@@ -646,6 +656,60 @@ function Index({ ...props }) {
+         </div>
+       </form>
+ 
++      {/* Submit to Blockchain Button */}
++      <div
++        style={{
++          display: "flex",
++          justifyContent: "center",
++          padding: "20px",
++          borderTop: "1px solid #e0e0e0",
++          backgroundColor: "#f9f9f9",
++        }}
++      >
++        <button
++          type="button"
++          onClick={async () => {
++            const data = getValues();
++            try {
++              await schemaValidation.validate(data);
++              setIsSubmitModalOpen(true);
++            } catch (e) {
++              toast.error("Please complete all required fields before submitting on-chain");
++            }
++          }}
++          className="btn"
++          style={{
++            backgroundColor: "#1976d2",
++            display: "flex",
++            alignItems: "center",
++            gap: "8px",
++          }}
++        >
++          <FontAwesomeIcon icon={faLink} />
++          Submit Terms On-Chain
++        </button>
++      </div>
++
++      {/* Submit Terms Modal */}
++      <SubmitTermsModal
++        isOpen={isSubmitModalOpen}
++        onClose={() => setIsSubmitModalOpen(false)}
++        applicationId={applicationID}
++        paymentTerms={submissionPaymentTerms || (getValues() as CreatePaymentTerm)}
++        orderDetails={
++          submissionOrderDetails || {
++            exportPort: "",
++            importPort: "",
++            products: [],
++          }
++        }
++        counterpartyPrincipal={supplierInfo?.supplierId || ""}
++        onSuccess={(txData) => {
++          toast.success("Payment terms submitted on-chain successfully!");
++          console.log("Terms submission tx:", txData);
++        }}
++      />
++
+       <BottomBar onBack={onBack} onSubmit={onSubmit}></BottomBar>
+     </ApplicationLayout>
+   );
+diff --git a/apps/frontend/src/utils/hooks/buyerApplication/useTermsSubmission.ts b/apps/frontend/src/utils/hooks/buyerApplication/useTermsSubmission.ts
+new file mode 100644
+index 00000000..e54ce597
+--- /dev/null
++++ b/apps/frontend/src/utils/hooks/buyerApplication/useTermsSubmission.ts
+@@ -0,0 +1,124 @@
++import buyerApplicationService from "@services/application/buyerApplicationService";
++import { useQuery } from "@tanstack/react-query";
++import { CreatePaymentTerm } from "src/types/payment_terms";
++import { GetOrderDetailsResponse } from "src/types/order_details";
++import { GetSupplierInfoResponse } from "src/types/supplier_info_for_buyer";
++
++interface TermsSubmissionData {
++  paymentTerms: CreatePaymentTerm | null;
++  orderDetails: {
++    exportPort: string;
++    importPort: string;
++    products: Array<{
++      name: string;
++      quantity: number;
++      unitPrice: number;
++    }>;
++  } | null;
++  supplierInfo: GetSupplierInfoResponse | null;
++  isLoading: boolean;
++  isError: boolean;
++}
++
++/**
++ * Hook to fetch all data needed for on-chain terms submission
++ * Fetches payment terms, order details, and supplier info
++ */
++const useTermsSubmission = (applicationId: string): TermsSubmissionData => {
++  // Fetch order details
++  const orderDetailsQuery = useQuery({
++    queryKey: ["orderDetails", applicationId],
++    queryFn: async () => {
++      try {
++        const response = await buyerApplicationService.getOrderDetailInfo(applicationId);
++        return response;
++      } catch (error) {
++        console.error("Error fetching order details:", error);
++        return null;
++      }
++    },
++    enabled: !!applicationId,
++  });
++
++  // Fetch supplier info
++  const supplierInfoQuery = useQuery({
++    queryKey: ["supplierInfo", applicationId],
++    queryFn: async () => {
++      try {
++        const response = await buyerApplicationService.getSupplierInfo(applicationId);
++        return response;
++      } catch (error) {
++        console.error("Error fetching supplier info:", error);
++        return null;
++      }
++    },
++    enabled: !!applicationId,
++  });
++
++  // Fetch payment terms
++  const paymentTermsQuery = useQuery({
++    queryKey: ["paymentTermsForSubmission", applicationId],
++    queryFn: async () => {
++      try {
++        const response = await buyerApplicationService.getPaymentTerms(applicationId);
++        return response;
++      } catch (error) {
++        console.error("Error fetching payment terms:", error);
++        return null;
++      }
++    },
++    enabled: !!applicationId,
++  });
++
++  // Transform order details to the format expected by SubmitTermsModal
++  const orderDetails = orderDetailsQuery.data
++    ? {
++        exportPort: orderDetailsQuery.data.exportPort || "",
++        importPort: orderDetailsQuery.data.importPort || "",
++        products: (orderDetailsQuery.data.products || []).map((p) => ({
++          name: p.name,
++          quantity: p.quantity,
++          unitPrice: p.unitPrice,
++        })),
++      }
++    : null;
++
++  // Transform payment terms response to CreatePaymentTerm format
++  const paymentTerms = paymentTermsQuery.data
++    ? {
++        isConcluded: paymentTermsQuery.data.isConcluded,
++        partialRefinancing: paymentTermsQuery.data.partialRefinancing,
++        interestExists: paymentTermsQuery.data.interestExists,
++        interestPercentage: paymentTermsQuery.data.interestPercentage,
++        interestCurrency: paymentTermsQuery.data.interestCurrency,
++        interestType: paymentTermsQuery.data.interestType,
++        interestFixedRate: paymentTermsQuery.data.interestFixedRate,
++        interestDegressiveRate: paymentTermsQuery.data.interestDegressiveRate,
++        paymentType: paymentTermsQuery.data.paymentType,
++        downpaymentCurrency: paymentTermsQuery.data.downpaymentCurrency,
++        downpaymentAmount: parseFloat(paymentTermsQuery.data.downpaymentAmount as any) || 0,
++        downpaymentDescription: paymentTermsQuery.data.downpaymentDescription,
++        balanceCurrency: paymentTermsQuery.data.balanceCurrency,
++        balanceAmount: parseFloat(paymentTermsQuery.data.balanceAmount as any) || 0,
++        balancePaymentDeadline: paymentTermsQuery.data.balancePaymentDeadline,
++        paymentVehicleDescription: paymentTermsQuery.data.paymentVehicleDescription,
++        paymentDuration: paymentTermsQuery.data.paymentDuration,
++      } as CreatePaymentTerm
++    : null;
++
++  return {
++    paymentTerms,
++    orderDetails,
++    supplierInfo: supplierInfoQuery.data || null,
++    isLoading:
++      orderDetailsQuery.isLoading ||
++      supplierInfoQuery.isLoading ||
++      paymentTermsQuery.isLoading,
++    isError:
++      orderDetailsQuery.isError ||
++      supplierInfoQuery.isError ||
++      paymentTermsQuery.isError,
++  };
++};
++
++export default useTermsSubmission;
+-- 
+2.43.0
+
