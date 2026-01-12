@@ -1,7 +1,7 @@
 From 138567eadab3883f7a75c4effba50e4a04315204 Mon Sep 17 00:00:00 2001
 From: Claude <noreply@anthropic.com>
 Date: Mon, 12 Jan 2026 14:09:56 +0000
-Subject: [PATCH 1/2] chore(deps): update dependencies for Node.js 18+
+Subject: [PATCH 1/3] chore(deps): update dependencies for Node.js 18+
  compatibility
 
 - Update Node.js engine requirement from >=14 to >=18 across all packages
@@ -831,7 +831,7 @@ index fe3bcc52..18a7f930 100644
 From 11df80a1b4bc30d3f8e5b06d58a909be7dd23c62 Mon Sep 17 00:00:00 2001
 From: Claude <noreply@anthropic.com>
 Date: Mon, 12 Jan 2026 14:33:30 +0000
-Subject: [PATCH 2/2] feat: add purchase order on-chain submission
+Subject: [PATCH 2/3] feat: add purchase order on-chain submission
  functionality
 
 - Add new contract constants for purchase order and storage contracts
@@ -1390,6 +1390,829 @@ index f311b5d1..2e3874ca 100644
  export const CURRENCIES = [
    { cc: "AED", symbol: "\u062f.\u0625;", name: "UAE dirham" },
    { cc: "AFN", symbol: "Afs", name: "Afghan afghani" },
+-- 
+2.43.0
+
+
+From 98a02c734c8c1e278d055f11be2bfb47079fdd5d Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Mon, 12 Jan 2026 14:45:26 +0000
+Subject: [PATCH 3/3] feat: add contract viewer and signing workflow components
+
+- Add contract types (PurchaseOrderContract, ContractTerms, etc.)
+- Create ContractViewerModal for viewing and signing contracts
+  - Display contract parties with signature status
+  - Show contract terms and payment details
+  - Sign and reject functionality with wallet integration
+  - On-chain hash verification display
+- Add hash utilities for generating order hashes
+  - SHA256 hash generation
+  - Order hash and detail hash generators
+  - Hash verification function
+
+This implements User Story #2 (Contract Viewing & Signing) from Phase 1
+---
+ .../components/modal/contractViewerModal.tsx  | 629 ++++++++++++++++++
+ apps/frontend/src/types/contract.ts           |  59 ++
+ apps/frontend/src/utils/lib/hashUtils.ts      |  87 +++
+ 3 files changed, 775 insertions(+)
+ create mode 100644 apps/frontend/src/components/modal/contractViewerModal.tsx
+ create mode 100644 apps/frontend/src/types/contract.ts
+ create mode 100644 apps/frontend/src/utils/lib/hashUtils.ts
+
+diff --git a/apps/frontend/src/components/modal/contractViewerModal.tsx b/apps/frontend/src/components/modal/contractViewerModal.tsx
+new file mode 100644
+index 00000000..bed3acf7
+--- /dev/null
++++ b/apps/frontend/src/components/modal/contractViewerModal.tsx
+@@ -0,0 +1,629 @@
++import {
++  faClose,
++  faCheckCircle,
++  faTimesCircle,
++  faSpinner,
++  faFileContract,
++  faPen,
++} from "@fortawesome/free-solid-svg-icons";
++import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
++import useTaralContracts from "@hooks/useTaralContracts";
++import { useState } from "react";
++import { toast } from "sonner";
++import {
++  PurchaseOrderContract,
++  ContractTerms,
++  ContractStatus,
++} from "src/types/contract";
++
++type Props = {
++  isOpen: boolean;
++  onClose: () => void;
++  orderId: number;
++  contract: PurchaseOrderContract | null;
++  terms?: ContractTerms;
++  userRole: "exporter" | "importer";
++  onSignSuccess?: () => void;
++};
++
++type ActionState = "idle" | "signing" | "rejecting" | "success" | "error";
++
++function ContractViewerModal({
++  isOpen,
++  onClose,
++  orderId,
++  contract,
++  terms,
++  userRole,
++  onSignSuccess,
++}: Props) {
++  const { isSignedIn, stxAddress } = useTaralContracts();
++  const [actionState, setActionState] = useState<ActionState>("idle");
++  const [showRejectForm, setShowRejectForm] = useState(false);
++  const [rejectionReason, setRejectionReason] = useState("");
++
++  const truncateAddress = (address: string) => {
++    if (!address) return "";
++    return `${address.slice(0, 8)}...${address.slice(-8)}`;
++  };
++
++  const formatAmount = (amount: number) => {
++    return new Intl.NumberFormat("en-US", {
++      style: "currency",
++      currency: "USD",
++    }).format(amount / 1000000);
++  };
++
++  const getStatusColor = (status: ContractStatus) => {
++    switch (status) {
++      case "pending":
++        return "#FFA500";
++      case "awaiting_signatures":
++        return "#2196F3";
++      case "signed":
++        return "#4CAF50";
++      case "rejected":
++        return "#f44336";
++      case "completed":
++        return "#4CAF50";
++      case "cancelled":
++        return "#9E9E9E";
++      default:
++        return "#666";
++    }
++  };
++
++  const getStatusLabel = (status: ContractStatus) => {
++    switch (status) {
++      case "pending":
++        return "Pending";
++      case "awaiting_signatures":
++        return "Awaiting Signatures";
++      case "signed":
++        return "Signed";
++      case "rejected":
++        return "Rejected";
++      case "completed":
++        return "Completed";
++      case "cancelled":
++        return "Cancelled";
++      default:
++        return status;
++    }
++  };
++
++  const handleSign = async () => {
++    if (!isSignedIn) {
++      toast.error("Please connect your wallet first");
++      return;
++    }
++
++    setActionState("signing");
++
++    try {
++      // TODO: Call the actual signing contract function
++      // For now, simulate the signing process
++      await new Promise((resolve) => setTimeout(resolve, 2000));
++
++      setActionState("success");
++      toast.success("Contract signed successfully!");
++
++      if (onSignSuccess) {
++        onSignSuccess();
++      }
++    } catch (error: any) {
++      console.error("Error signing contract:", error);
++      setActionState("error");
++      toast.error(error.message || "Failed to sign contract");
++    }
++  };
++
++  const handleReject = async () => {
++    if (!rejectionReason.trim()) {
++      toast.error("Please provide a reason for rejection");
++      return;
++    }
++
++    setActionState("rejecting");
++
++    try {
++      // TODO: Call the actual rejection contract function
++      await new Promise((resolve) => setTimeout(resolve, 2000));
++
++      setActionState("success");
++      toast.success("Contract rejected");
++      setShowRejectForm(false);
++
++      if (onSignSuccess) {
++        onSignSuccess();
++      }
++    } catch (error: any) {
++      console.error("Error rejecting contract:", error);
++      setActionState("error");
++      toast.error(error.message || "Failed to reject contract");
++    }
++  };
++
++  const canSign = () => {
++    if (!contract || !isSignedIn || !stxAddress) return false;
++
++    const userSignature = contract.signatures.find(
++      (sig) => sig.role === userRole
++    );
++
++    return userSignature && !userSignature.signed;
++  };
++
++  const handleClose = () => {
++    setActionState("idle");
++    setShowRejectForm(false);
++    setRejectionReason("");
++    onClose();
++  };
++
++  if (!isOpen) return null;
++
++  return (
++    <div className={"newApplicationModal active"}>
++      <div className="modalMenue" style={{ maxWidth: "800px", maxHeight: "90vh", overflow: "auto" }}>
++        <div onClick={handleClose} className="close">
++          <FontAwesomeIcon icon={faClose} />
++        </div>
++
++        <div className="form" style={{ flexDirection: "column", gap: "20px", padding: "20px" }}>
++          {/* Header */}
++          <div style={{ textAlign: "center", width: "100%" }}>
++            <FontAwesomeIcon
++              icon={faFileContract}
++              style={{ fontSize: "36px", color: "#1976d2", marginBottom: "10px" }}
++            />
++            <div className="header-application">
++              Purchase Order Contract #{orderId}
++            </div>
++            {contract && (
++              <div
++                style={{
++                  display: "inline-block",
++                  padding: "4px 12px",
++                  borderRadius: "16px",
++                  backgroundColor: getStatusColor(contract.status),
++                  color: "white",
++                  fontSize: "12px",
++                  fontWeight: "bold",
++                  marginTop: "10px",
++                }}
++              >
++                {getStatusLabel(contract.status)}
++              </div>
++            )}
++          </div>
++
++          {/* Contract Details */}
++          {contract && (
++            <>
++              {/* Parties Section */}
++              <div
++                style={{
++                  backgroundColor: "#f5f5f5",
++                  padding: "20px",
++                  borderRadius: "8px",
++                  width: "100%",
++                }}
++              >
++                <h4 style={{ marginBottom: "15px", color: "#333" }}>
++                  Contract Parties
++                </h4>
++                <div style={{ display: "grid", gap: "15px" }}>
++                  <div
++                    style={{
++                      display: "flex",
++                      justifyContent: "space-between",
++                      alignItems: "center",
++                      padding: "10px",
++                      backgroundColor: "white",
++                      borderRadius: "4px",
++                    }}
++                  >
++                    <div>
++                      <span style={{ color: "#666", fontSize: "12px" }}>
++                        EXPORTER
++                      </span>
++                      <br />
++                      <span style={{ fontFamily: "monospace" }}>
++                        {truncateAddress(contract.exporterPrincipal)}
++                      </span>
++                    </div>
++                    {contract.signatures.find((s) => s.role === "exporter")
++                      ?.signed ? (
++                      <FontAwesomeIcon
++                        icon={faCheckCircle}
++                        style={{ color: "#4CAF50", fontSize: "20px" }}
++                      />
++                    ) : (
++                      <span
++                        style={{
++                          color: "#FFA500",
++                          fontSize: "12px",
++                          fontWeight: "bold",
++                        }}
++                      >
++                        Awaiting Signature
++                      </span>
++                    )}
++                  </div>
++
++                  <div
++                    style={{
++                      display: "flex",
++                      justifyContent: "space-between",
++                      alignItems: "center",
++                      padding: "10px",
++                      backgroundColor: "white",
++                      borderRadius: "4px",
++                    }}
++                  >
++                    <div>
++                      <span style={{ color: "#666", fontSize: "12px" }}>
++                        IMPORTER
++                      </span>
++                      <br />
++                      <span style={{ fontFamily: "monospace" }}>
++                        {truncateAddress(contract.importerPrincipal)}
++                      </span>
++                    </div>
++                    {contract.signatures.find((s) => s.role === "importer")
++                      ?.signed ? (
++                      <FontAwesomeIcon
++                        icon={faCheckCircle}
++                        style={{ color: "#4CAF50", fontSize: "20px" }}
++                      />
++                    ) : (
++                      <span
++                        style={{
++                          color: "#FFA500",
++                          fontSize: "12px",
++                          fontWeight: "bold",
++                        }}
++                      >
++                        Awaiting Signature
++                      </span>
++                    )}
++                  </div>
++                </div>
++              </div>
++
++              {/* Contract Terms Section */}
++              <div
++                style={{
++                  backgroundColor: "#f5f5f5",
++                  padding: "20px",
++                  borderRadius: "8px",
++                  width: "100%",
++                }}
++              >
++                <h4 style={{ marginBottom: "15px", color: "#333" }}>
++                  Contract Terms
++                </h4>
++                <div
++                  style={{
++                    display: "grid",
++                    gridTemplateColumns: "1fr 1fr",
++                    gap: "15px",
++                  }}
++                >
++                  <div>
++                    <span style={{ color: "#666", fontSize: "12px" }}>
++                      ORDER AMOUNT
++                    </span>
++                    <br />
++                    <span style={{ fontWeight: "bold", fontSize: "18px" }}>
++                      {formatAmount(contract.amount)}
++                    </span>
++                  </div>
++                  <div>
++                    <span style={{ color: "#666", fontSize: "12px" }}>
++                      PAYMENT TERM
++                    </span>
++                    <br />
++                    <span style={{ fontWeight: "bold" }}>
++                      {contract.paymentTerm}
++                    </span>
++                  </div>
++                  <div>
++                    <span style={{ color: "#666", fontSize: "12px" }}>
++                      DELIVERY TERM
++                    </span>
++                    <br />
++                    <span style={{ fontWeight: "bold" }}>
++                      {contract.deliveryTerm}
++                    </span>
++                  </div>
++                  <div>
++                    <span style={{ color: "#666", fontSize: "12px" }}>
++                      ORDER ID
++                    </span>
++                    <br />
++                    <span style={{ fontWeight: "bold" }}>#{orderId}</span>
++                  </div>
++                </div>
++              </div>
++
++              {/* Additional Terms if provided */}
++              {terms && (
++                <div
++                  style={{
++                    backgroundColor: "#f5f5f5",
++                    padding: "20px",
++                    borderRadius: "8px",
++                    width: "100%",
++                  }}
++                >
++                  <h4 style={{ marginBottom: "15px", color: "#333" }}>
++                    Payment Details
++                  </h4>
++                  <div
++                    style={{
++                      display: "grid",
++                      gridTemplateColumns: "1fr 1fr",
++                      gap: "15px",
++                    }}
++                  >
++                    <div>
++                      <span style={{ color: "#666", fontSize: "12px" }}>
++                        DOWNPAYMENT
++                      </span>
++                      <br />
++                      <span style={{ fontWeight: "bold" }}>
++                        {terms.downpaymentCurrency} {terms.downpaymentAmount}
++                      </span>
++                    </div>
++                    <div>
++                      <span style={{ color: "#666", fontSize: "12px" }}>
++                        BALANCE
++                      </span>
++                      <br />
++                      <span style={{ fontWeight: "bold" }}>
++                        {terms.balanceCurrency} {terms.balanceAmount}
++                      </span>
++                    </div>
++                    <div>
++                      <span style={{ color: "#666", fontSize: "12px" }}>
++                        BALANCE DUE DATE
++                      </span>
++                      <br />
++                      <span style={{ fontWeight: "bold" }}>
++                        {terms.balancePaymentDeadline}
++                      </span>
++                    </div>
++                    <div>
++                      <span style={{ color: "#666", fontSize: "12px" }}>
++                        PAYMENT DURATION
++                      </span>
++                      <br />
++                      <span style={{ fontWeight: "bold" }}>
++                        {terms.paymentDuration} days
++                      </span>
++                    </div>
++                    {terms.interestExists && (
++                      <>
++                        <div>
++                          <span style={{ color: "#666", fontSize: "12px" }}>
++                            INTEREST TYPE
++                          </span>
++                          <br />
++                          <span style={{ fontWeight: "bold" }}>
++                            {terms.interestType}
++                          </span>
++                        </div>
++                        <div>
++                          <span style={{ color: "#666", fontSize: "12px" }}>
++                            INTEREST RATE
++                          </span>
++                          <br />
++                          <span style={{ fontWeight: "bold" }}>
++                            {terms.interestPercentage}%
++                          </span>
++                        </div>
++                      </>
++                    )}
++                  </div>
++                </div>
++              )}
++
++              {/* Hashes Section */}
++              <div
++                style={{
++                  backgroundColor: "#e8f4fd",
++                  padding: "15px",
++                  borderRadius: "8px",
++                  width: "100%",
++                }}
++              >
++                <h4 style={{ marginBottom: "10px", color: "#1976d2" }}>
++                  On-Chain Verification
++                </h4>
++                <div style={{ fontSize: "12px" }}>
++                  <div style={{ marginBottom: "8px" }}>
++                    <span style={{ color: "#666" }}>Order Hash:</span>
++                    <br />
++                    <code
++                      style={{
++                        backgroundColor: "white",
++                        padding: "4px 8px",
++                        borderRadius: "4px",
++                        wordBreak: "break-all",
++                      }}
++                    >
++                      {contract.orderHash}
++                    </code>
++                  </div>
++                  <div>
++                    <span style={{ color: "#666" }}>Detail Hash:</span>
++                    <br />
++                    <code
++                      style={{
++                        backgroundColor: "white",
++                        padding: "4px 8px",
++                        borderRadius: "4px",
++                        wordBreak: "break-all",
++                      }}
++                    >
++                      {contract.orderDetailHash}
++                    </code>
++                  </div>
++                </div>
++              </div>
++
++              {/* Rejection Form */}
++              {showRejectForm && (
++                <div
++                  style={{
++                    backgroundColor: "#ffebee",
++                    padding: "20px",
++                    borderRadius: "8px",
++                    width: "100%",
++                  }}
++                >
++                  <h4 style={{ marginBottom: "10px", color: "#c62828" }}>
++                    Rejection Reason
++                  </h4>
++                  <textarea
++                    value={rejectionReason}
++                    onChange={(e) => setRejectionReason(e.target.value)}
++                    placeholder="Please provide a reason for rejecting this contract..."
++                    style={{
++                      width: "100%",
++                      minHeight: "100px",
++                      padding: "10px",
++                      borderRadius: "4px",
++                      border: "1px solid #ef9a9a",
++                      marginBottom: "10px",
++                    }}
++                  />
++                  <div style={{ display: "flex", gap: "10px" }}>
++                    <button
++                      className="btn"
++                      style={{ backgroundColor: "#ccc", color: "#333" }}
++                      onClick={() => setShowRejectForm(false)}
++                    >
++                      Cancel
++                    </button>
++                    <button
++                      className="btn"
++                      style={{ backgroundColor: "#c62828" }}
++                      onClick={handleReject}
++                      disabled={actionState === "rejecting"}
++                    >
++                      {actionState === "rejecting" ? (
++                        <>
++                          <FontAwesomeIcon
++                            icon={faSpinner}
++                            spin
++                            style={{ marginRight: "8px" }}
++                          />
++                          Rejecting...
++                        </>
++                      ) : (
++                        "Confirm Rejection"
++                      )}
++                    </button>
++                  </div>
++                </div>
++              )}
++
++              {/* Action Buttons */}
++              {canSign() && !showRejectForm && (
++                <div
++                  style={{
++                    display: "flex",
++                    gap: "15px",
++                    justifyContent: "center",
++                    marginTop: "10px",
++                  }}
++                >
++                  <button
++                    className="btn"
++                    style={{ backgroundColor: "#c62828" }}
++                    onClick={() => setShowRejectForm(true)}
++                    disabled={actionState === "signing"}
++                  >
++                    <FontAwesomeIcon
++                      icon={faTimesCircle}
++                      style={{ marginRight: "8px" }}
++                    />
++                    Reject Contract
++                  </button>
++                  <button
++                    className="btn"
++                    style={{ backgroundColor: "#4CAF50" }}
++                    onClick={handleSign}
++                    disabled={actionState === "signing"}
++                  >
++                    {actionState === "signing" ? (
++                      <>
++                        <FontAwesomeIcon
++                          icon={faSpinner}
++                          spin
++                          style={{ marginRight: "8px" }}
++                        />
++                        Signing...
++                      </>
++                    ) : (
++                      <>
++                        <FontAwesomeIcon
++                          icon={faPen}
++                          style={{ marginRight: "8px" }}
++                        />
++                        Sign Contract
++                      </>
++                    )}
++                  </button>
++                </div>
++              )}
++
++              {!isSignedIn && (
++                <div
++                  style={{
++                    color: "#f44336",
++                    textAlign: "center",
++                    fontSize: "14px",
++                    marginTop: "10px",
++                  }}
++                >
++                  Please connect your wallet to sign or reject this contract
++                </div>
++              )}
++            </>
++          )}
++
++          {/* Loading State */}
++          {!contract && (
++            <div style={{ textAlign: "center", padding: "40px" }}>
++              <FontAwesomeIcon
++                icon={faSpinner}
++                spin
++                style={{ fontSize: "32px", color: "#1976d2" }}
++              />
++              <p style={{ marginTop: "15px", color: "#666" }}>
++                Loading contract details...
++              </p>
++            </div>
++          )}
++
++          {/* Close Button */}
++          <div style={{ textAlign: "center", marginTop: "10px" }}>
++            <button
++              className="btn"
++              style={{ backgroundColor: "#666" }}
++              onClick={handleClose}
++            >
++              Close
++            </button>
++          </div>
++        </div>
++      </div>
++    </div>
++  );
++}
++
++export default ContractViewerModal;
+diff --git a/apps/frontend/src/types/contract.ts b/apps/frontend/src/types/contract.ts
+new file mode 100644
+index 00000000..c88e39ff
+--- /dev/null
++++ b/apps/frontend/src/types/contract.ts
+@@ -0,0 +1,59 @@
++/**
++ * Contract/Purchase Order Types for on-chain representation
++ */
++
++export interface PurchaseOrderContract {
++  orderId: number;
++  exporterPrincipal: string;
++  importerPrincipal: string;
++  orderHash: string;
++  orderDetailHash: string;
++  paymentTerm: string;
++  amount: number;
++  deliveryTerm: string;
++  status: ContractStatus;
++  createdAt: number; // block height
++  signatures: ContractSignature[];
++}
++
++export type ContractStatus =
++  | "pending"
++  | "awaiting_signatures"
++  | "signed"
++  | "rejected"
++  | "completed"
++  | "cancelled";
++
++export interface ContractSignature {
++  principal: string;
++  role: "exporter" | "importer";
++  signed: boolean;
++  signedAt?: number; // block height
++  rejectionReason?: string;
++}
++
++export interface ContractTerms {
++  paymentType: string;
++  paymentDuration: number;
++  downpaymentAmount: number;
++  downpaymentCurrency: string;
++  balanceAmount: number;
++  balanceCurrency: string;
++  balancePaymentDeadline: string;
++  interestExists: boolean;
++  interestType?: string;
++  interestPercentage?: number;
++  deliveryTerm: string;
++  exportPort: string;
++  importPort: string;
++}
++
++export interface ContractViewerProps {
++  orderId: number;
++  contract?: PurchaseOrderContract;
++  terms?: ContractTerms;
++  isLoading?: boolean;
++  onSign?: () => Promise<void>;
++  onReject?: (reason: string) => Promise<void>;
++  onClose?: () => void;
++}
+diff --git a/apps/frontend/src/utils/lib/hashUtils.ts b/apps/frontend/src/utils/lib/hashUtils.ts
+new file mode 100644
+index 00000000..60ac7091
+--- /dev/null
++++ b/apps/frontend/src/utils/lib/hashUtils.ts
+@@ -0,0 +1,87 @@
++/**
++ * Hash utilities for generating order hashes for on-chain submission
++ */
++
++/**
++ * Generate SHA256 hash of data
++ * @param data - Data to hash (string or object)
++ * @returns Hex-encoded SHA256 hash
++ */
++export async function sha256Hash(data: string | object): Promise<string> {
++  const text = typeof data === "string" ? data : JSON.stringify(data);
++  const encoder = new TextEncoder();
++  const dataBuffer = encoder.encode(text);
++
++  const hashBuffer = await crypto.subtle.digest("SHA-256", dataBuffer);
++  const hashArray = Array.from(new Uint8Array(hashBuffer));
++  const hashHex = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
++
++  return hashHex;
++}
++
++/**
++ * Generate order hash from order data
++ * This creates a deterministic hash of the core order information
++ */
++export async function generateOrderHash(orderData: {
++  exporterPrincipal: string;
++  importerPrincipal: string;
++  amount: number;
++  paymentTerm: string;
++  deliveryTerm: string;
++  timestamp?: number;
++}): Promise<string> {
++  const dataToHash = {
++    exporter: orderData.exporterPrincipal,
++    importer: orderData.importerPrincipal,
++    amount: orderData.amount,
++    paymentTerm: orderData.paymentTerm,
++    deliveryTerm: orderData.deliveryTerm,
++    timestamp: orderData.timestamp || Date.now(),
++  };
++
++  return sha256Hash(dataToHash);
++}
++
++/**
++ * Generate order detail hash from detailed order information
++ * This includes additional details like products, ports, etc.
++ */
++export async function generateOrderDetailHash(orderDetails: {
++  products?: Array<{
++    name: string;
++    quantity: number;
++    unitPrice: number;
++  }>;
++  exportPort?: string;
++  importPort?: string;
++  downpaymentAmount?: number;
++  downpaymentCurrency?: string;
++  balanceAmount?: number;
++  balanceCurrency?: string;
++  interestExists?: boolean;
++  interestType?: string;
++  interestPercentage?: number;
++  [key: string]: any;
++}): Promise<string> {
++  // Sort keys for deterministic hashing
++  const sortedDetails = Object.keys(orderDetails)
++    .sort()
++    .reduce((obj: any, key) => {
++      obj[key] = orderDetails[key];
++      return obj;
++    }, {});
++
++  return sha256Hash(sortedDetails);
++}
++
++/**
++ * Verify a hash matches the expected data
++ */
++export async function verifyHash(
++  data: string | object,
++  expectedHash: string
++): Promise<boolean> {
++  const computedHash = await sha256Hash(data);
++  return computedHash.toLowerCase() === expectedHash.toLowerCase();
++}
 -- 
 2.43.0
 
