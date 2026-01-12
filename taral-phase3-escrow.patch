@@ -1,0 +1,1408 @@
+diff --git a/packages/clarity/Clarinet.toml b/packages/clarity/Clarinet.toml
+index fac3da65..a7f7bdbb 100644
+--- a/packages/clarity/Clarinet.toml
++++ b/packages/clarity/Clarinet.toml
+@@ -160,6 +160,13 @@ path = "contracts/taral/taral-bank-storage.clar"
+ path = "contracts/taral/taral-bank.clar"
+ depends_on = ["taral-bank-storage"]
+ 
++[contracts.escrow-storage]
++path = "contracts/taral/escrow-storage.clar"
++
++[contracts.taral-escrow]
++path = "contracts/taral/taral-escrow.clar"
++depends_on = ["escrow-storage", "purchase-order-storage", "exporter-storage", "importer-storage", "token-susdt"]
++
+ clarity_version = 2
+ epoch = 2.1
+ [repl.analysis]
+diff --git a/packages/clarity/contracts/taral/escrow-storage.clar b/packages/clarity/contracts/taral/escrow-storage.clar
+new file mode 100644
+index 00000000..d6e254ab
+--- /dev/null
++++ b/packages/clarity/contracts/taral/escrow-storage.clar
+@@ -0,0 +1,400 @@
++;; Escrow Storage Contract
++;; Stores escrow data for purchase orders with shipment confirmation
++
++;; Escrow status constants
++(define-constant ESCROW_STATUS_PENDING u0)
++(define-constant ESCROW_STATUS_FUNDED u1)
++(define-constant ESCROW_STATUS_SHIPPED u2)
++(define-constant ESCROW_STATUS_DELIVERED u3)
++(define-constant ESCROW_STATUS_RELEASED u4)
++(define-constant ESCROW_STATUS_DISPUTED u5)
++(define-constant ESCROW_STATUS_REFUNDED u6)
++
++;; Auto-release period in blocks (approximately 14 days at 10 min blocks)
++(define-data-var auto-release-blocks uint u2016)
++
++;; Escrow nonce for unique IDs
++(define-data-var escrow-id-nonce uint u1)
++
++;; Main escrow storage map
++(define-map escrows {id: uint}
++  {
++    order-id: uint,
++    exporter: principal,
++    importer: principal,
++    amount: uint,
++    downpayment-amount: uint,
++    balance-amount: uint,
++    status: uint,
++    funded-at: uint,
++    shipped-at: uint,
++    delivered-at: uint,
++    released-at: uint,
++    auto-release-at: uint,
++    shipment-hash: (optional (buff 256)),
++    delivery-hash: (optional (buff 256)),
++    created-at: uint,
++    updated-at: uint
++  }
++)
++
++;; Map order ID to escrow ID
++(define-map order-escrow {order-id: uint} {escrow-id: uint})
++
++;; Shipment tracking map
++(define-map shipment-tracking {escrow-id: uint}
++  {
++    carrier: (string-utf8 100),
++    tracking-number: (string-utf8 100),
++    estimated-delivery: uint,
++    shipped-at: uint,
++    tracking-hash: (buff 256)
++  }
++)
++
++;; Delivery documents map
++(define-map delivery-documents {escrow-id: uint, doc-index: uint}
++  {
++    doc-type: (string-utf8 50),
++    doc-hash: (buff 256),
++    uploaded-by: principal,
++    uploaded-at: uint,
++    verified: bool
++  }
++)
++
++;; Document count per escrow
++(define-map escrow-doc-count {escrow-id: uint} {count: uint})
++
++;; Dispute records
++(define-map disputes {escrow-id: uint}
++  {
++    raised-by: principal,
++    reason: (string-utf8 500),
++    raised-at: uint,
++    resolved: bool,
++    resolution: (optional (string-utf8 500)),
++    resolved-at: uint,
++    resolution-type: uint  ;; 0=pending, 1=release-to-exporter, 2=refund-to-importer, 3=partial
++  }
++)
++
++;; Read-only functions
++
++(define-read-only (get-escrow-id-nonce)
++  (var-get escrow-id-nonce)
++)
++
++(define-read-only (get-escrow (escrow-id uint))
++  (map-get? escrows {id: escrow-id})
++)
++
++(define-read-only (get-escrow-by-order (order-id uint))
++  (match (map-get? order-escrow {order-id: order-id})
++    escrow-mapping (map-get? escrows {id: (get escrow-id escrow-mapping)})
++    none
++  )
++)
++
++(define-read-only (get-escrow-id-by-order (order-id uint))
++  (match (map-get? order-escrow {order-id: order-id})
++    escrow-mapping (some (get escrow-id escrow-mapping))
++    none
++  )
++)
++
++(define-read-only (get-shipment-tracking (escrow-id uint))
++  (map-get? shipment-tracking {escrow-id: escrow-id})
++)
++
++(define-read-only (get-delivery-document (escrow-id uint) (doc-index uint))
++  (map-get? delivery-documents {escrow-id: escrow-id, doc-index: doc-index})
++)
++
++(define-read-only (get-escrow-doc-count (escrow-id uint))
++  (default-to {count: u0} (map-get? escrow-doc-count {escrow-id: escrow-id}))
++)
++
++(define-read-only (get-dispute (escrow-id uint))
++  (map-get? disputes {escrow-id: escrow-id})
++)
++
++(define-read-only (get-auto-release-blocks)
++  (var-get auto-release-blocks)
++)
++
++(define-read-only (is-auto-releasable (escrow-id uint))
++  (match (map-get? escrows {id: escrow-id})
++    escrow-data
++    (and
++      (is-eq (get status escrow-data) ESCROW_STATUS_SHIPPED)
++      (>= block-height (get auto-release-at escrow-data))
++    )
++    false
++  )
++)
++
++;; Public functions
++
++(define-public (increment-escrow-id-nonce)
++  (begin
++    (var-set escrow-id-nonce (+ (var-get escrow-id-nonce) u1))
++    (ok true)
++  )
++)
++
++(define-public (set-auto-release-blocks (blocks uint))
++  (begin
++    (var-set auto-release-blocks blocks)
++    (ok true)
++  )
++)
++
++;; #[allow(unchecked_params)]
++;; #[allow(unchecked_data)]
++(define-public (create-escrow
++  (order-id uint)
++  (exporter principal)
++  (importer principal)
++  (amount uint)
++  (downpayment-amount uint)
++  (balance-amount uint))
++  (let (
++    (escrow-id (var-get escrow-id-nonce))
++    (auto-release-at (+ block-height (var-get auto-release-blocks)))
++  )
++    (map-set escrows {id: escrow-id}
++      {
++        order-id: order-id,
++        exporter: exporter,
++        importer: importer,
++        amount: amount,
++        downpayment-amount: downpayment-amount,
++        balance-amount: balance-amount,
++        status: ESCROW_STATUS_PENDING,
++        funded-at: u0,
++        shipped-at: u0,
++        delivered-at: u0,
++        released-at: u0,
++        auto-release-at: auto-release-at,
++        shipment-hash: none,
++        delivery-hash: none,
++        created-at: block-height,
++        updated-at: block-height
++      }
++    )
++    (map-set order-escrow {order-id: order-id} {escrow-id: escrow-id})
++    (ok escrow-id)
++  )
++)
++
++;; #[allow(unchecked_params)]
++;; #[allow(unchecked_data)]
++(define-public (update-escrow-status (escrow-id uint) (new-status uint))
++  (match (map-get? escrows {id: escrow-id})
++    escrow-data
++    (ok (map-set escrows {id: escrow-id}
++      (merge escrow-data {
++        status: new-status,
++        updated-at: block-height
++      })
++    ))
++    (err u404)
++  )
++)
++
++;; #[allow(unchecked_params)]
++;; #[allow(unchecked_data)]
++(define-public (mark-escrow-funded (escrow-id uint))
++  (match (map-get? escrows {id: escrow-id})
++    escrow-data
++    (ok (map-set escrows {id: escrow-id}
++      (merge escrow-data {
++        status: ESCROW_STATUS_FUNDED,
++        funded-at: block-height,
++        updated-at: block-height
++      })
++    ))
++    (err u404)
++  )
++)
++
++;; #[allow(unchecked_params)]
++;; #[allow(unchecked_data)]
++(define-public (mark-escrow-shipped (escrow-id uint) (shipment-hash (buff 256)))
++  (match (map-get? escrows {id: escrow-id})
++    escrow-data
++    (let (
++      (new-auto-release-at (+ block-height (var-get auto-release-blocks)))
++    )
++      (ok (map-set escrows {id: escrow-id}
++        (merge escrow-data {
++          status: ESCROW_STATUS_SHIPPED,
++          shipped-at: block-height,
++          auto-release-at: new-auto-release-at,
++          shipment-hash: (some shipment-hash),
++          updated-at: block-height
++        })
++      ))
++    )
++    (err u404)
++  )
++)
++
++;; #[allow(unchecked_params)]
++;; #[allow(unchecked_data)]
++(define-public (mark-escrow-delivered (escrow-id uint) (delivery-hash (buff 256)))
++  (match (map-get? escrows {id: escrow-id})
++    escrow-data
++    (ok (map-set escrows {id: escrow-id}
++      (merge escrow-data {
++        status: ESCROW_STATUS_DELIVERED,
++        delivered-at: block-height,
++        delivery-hash: (some delivery-hash),
++        updated-at: block-height
++      })
++    ))
++    (err u404)
++  )
++)
++
++;; #[allow(unchecked_params)]
++;; #[allow(unchecked_data)]
++(define-public (mark-escrow-released (escrow-id uint))
++  (match (map-get? escrows {id: escrow-id})
++    escrow-data
++    (ok (map-set escrows {id: escrow-id}
++      (merge escrow-data {
++        status: ESCROW_STATUS_RELEASED,
++        released-at: block-height,
++        updated-at: block-height
++      })
++    ))
++    (err u404)
++  )
++)
++
++;; #[allow(unchecked_params)]
++;; #[allow(unchecked_data)]
++(define-public (mark-escrow-disputed (escrow-id uint))
++  (match (map-get? escrows {id: escrow-id})
++    escrow-data
++    (ok (map-set escrows {id: escrow-id}
++      (merge escrow-data {
++        status: ESCROW_STATUS_DISPUTED,
++        updated-at: block-height
++      })
++    ))
++    (err u404)
++  )
++)
++
++;; #[allow(unchecked_params)]
++;; #[allow(unchecked_data)]
++(define-public (mark-escrow-refunded (escrow-id uint))
++  (match (map-get? escrows {id: escrow-id})
++    escrow-data
++    (ok (map-set escrows {id: escrow-id}
++      (merge escrow-data {
++        status: ESCROW_STATUS_REFUNDED,
++        updated-at: block-height
++      })
++    ))
++    (err u404)
++  )
++)
++
++;; #[allow(unchecked_params)]
++;; #[allow(unchecked_data)]
++(define-public (add-shipment-tracking
++  (escrow-id uint)
++  (carrier (string-utf8 100))
++  (tracking-number (string-utf8 100))
++  (estimated-delivery uint)
++  (tracking-hash (buff 256)))
++  (ok (map-set shipment-tracking {escrow-id: escrow-id}
++    {
++      carrier: carrier,
++      tracking-number: tracking-number,
++      estimated-delivery: estimated-delivery,
++      shipped-at: block-height,
++      tracking-hash: tracking-hash
++    }
++  ))
++)
++
++;; #[allow(unchecked_params)]
++;; #[allow(unchecked_data)]
++(define-public (add-delivery-document
++  (escrow-id uint)
++  (doc-type (string-utf8 50))
++  (doc-hash (buff 256))
++  (uploaded-by principal))
++  (let (
++    (current-count (get count (get-escrow-doc-count escrow-id)))
++    (new-index current-count)
++  )
++    (map-set delivery-documents {escrow-id: escrow-id, doc-index: new-index}
++      {
++        doc-type: doc-type,
++        doc-hash: doc-hash,
++        uploaded-by: uploaded-by,
++        uploaded-at: block-height,
++        verified: false
++      }
++    )
++    (map-set escrow-doc-count {escrow-id: escrow-id} {count: (+ current-count u1)})
++    (ok new-index)
++  )
++)
++
++;; #[allow(unchecked_params)]
++;; #[allow(unchecked_data)]
++(define-public (verify-delivery-document (escrow-id uint) (doc-index uint))
++  (match (map-get? delivery-documents {escrow-id: escrow-id, doc-index: doc-index})
++    doc-data
++    (ok (map-set delivery-documents {escrow-id: escrow-id, doc-index: doc-index}
++      (merge doc-data {verified: true})
++    ))
++    (err u404)
++  )
++)
++
++;; #[allow(unchecked_params)]
++;; #[allow(unchecked_data)]
++(define-public (create-dispute
++  (escrow-id uint)
++  (raised-by principal)
++  (reason (string-utf8 500)))
++  (ok (map-set disputes {escrow-id: escrow-id}
++    {
++      raised-by: raised-by,
++      reason: reason,
++      raised-at: block-height,
++      resolved: false,
++      resolution: none,
++      resolved-at: u0,
++      resolution-type: u0
++    }
++  ))
++)
++
++;; #[allow(unchecked_params)]
++;; #[allow(unchecked_data)]
++(define-public (resolve-dispute
++  (escrow-id uint)
++  (resolution (string-utf8 500))
++  (resolution-type uint))
++  (match (map-get? disputes {escrow-id: escrow-id})
++    dispute-data
++    (ok (map-set disputes {escrow-id: escrow-id}
++      (merge dispute-data {
++        resolved: true,
++        resolution: (some resolution),
++        resolved-at: block-height,
++        resolution-type: resolution-type
++      })
++    ))
++    (err u404)
++  )
++)
+diff --git a/packages/clarity/contracts/taral/exporter-storage.clar b/packages/clarity/contracts/taral/exporter-storage.clar
+index 63d8b3ec..1cdeee6a 100644
+--- a/packages/clarity/contracts/taral/exporter-storage.clar
++++ b/packages/clarity/contracts/taral/exporter-storage.clar
+@@ -4,6 +4,9 @@
+ 
+ (define-map exporter-by-principal principal uint)
+ 
++;; Reverse lookup: ID to principal
++(define-map principal-by-exporter-id uint principal)
++
+ (define-map exporter-profile 
+     {
+         exporter-id: uint
+@@ -30,10 +33,14 @@
+ )
+ 
+ ;; Read-only functions
+-(define-read-only (get-exporter-by-principal (exporter principal)) 
++(define-read-only (get-exporter-by-principal (exporter principal))
+     (map-get? exporter-by-principal exporter)
+ )
+ 
++(define-read-only (get-exporter-principal-by-id (exporter-id uint))
++    (map-get? principal-by-exporter-id exporter-id)
++)
++
+ (define-read-only (get-exporter-id-nonce)
+     (var-get exporter-id-nonce)
+ )
+@@ -86,8 +93,12 @@
+ 
+ ;; #[allow(unchecked_params)]
+ ;; #[allow(unchecked_data)]
+-(define-public (add-exporter (exporter principal) (exporter-id uint)) 
+-    (ok (map-set exporter-by-principal exporter exporter-id))
++(define-public (add-exporter (exporter principal) (exporter-id uint))
++    (begin
++        (map-set exporter-by-principal exporter exporter-id)
++        (map-set principal-by-exporter-id exporter-id exporter)
++        (ok true)
++    )
+ )
+ 
+ ;; #[allow(unchecked_params)]
+diff --git a/packages/clarity/contracts/taral/importer-storage.clar b/packages/clarity/contracts/taral/importer-storage.clar
+index 1ffc0856..c72ba236 100644
+--- a/packages/clarity/contracts/taral/importer-storage.clar
++++ b/packages/clarity/contracts/taral/importer-storage.clar
+@@ -4,6 +4,9 @@
+ 
+ (define-map importer-by-principal principal uint)
+ 
++;; Reverse lookup: ID to principal
++(define-map principal-by-importer-id uint principal)
++
+ (define-map importer-profile 
+     {
+         importer-id: uint
+@@ -30,10 +33,14 @@
+ )
+ 
+ ;; Read-only functions
+-(define-read-only (get-importer-by-principal (importer principal)) 
++(define-read-only (get-importer-by-principal (importer principal))
+     (map-get? importer-by-principal importer)
+ )
+ 
++(define-read-only (get-importer-principal-by-id (importer-id uint))
++    (map-get? principal-by-importer-id importer-id)
++)
++
+ (define-read-only (get-importer-id-nonce)
+     (var-get importer-id-nonce)
+ )
+@@ -85,8 +92,12 @@
+ 
+ ;; #[allow(unchecked_params)]
+ ;; #[allow(unchecked_data)]
+-(define-public (add-importer (importer principal) (importer-id uint)) 
+-    (ok (map-set importer-by-principal importer importer-id))
++(define-public (add-importer (importer principal) (importer-id uint))
++    (begin
++        (map-set importer-by-principal importer importer-id)
++        (map-set principal-by-importer-id importer-id importer)
++        (ok true)
++    )
+ )
+ 
+ ;; #[allow(unchecked_params)]
+diff --git a/packages/clarity/contracts/taral/taral-escrow.clar b/packages/clarity/contracts/taral/taral-escrow.clar
+new file mode 100644
+index 00000000..f622921c
+--- /dev/null
++++ b/packages/clarity/contracts/taral/taral-escrow.clar
+@@ -0,0 +1,356 @@
++;; Taral Escrow Contract
++;; Manages escrow for purchase orders with shipment confirmation and fund release
++
++(define-constant VERSION "0.1.0.beta")
++
++;; Error codes
++(define-constant ERR_UNAUTHORIZED (err u401))
++(define-constant ERR_ORDER_NOT_FOUND (err u404))
++(define-constant ERR_ESCROW_NOT_FOUND (err u405))
++(define-constant ERR_ESCROW_EXISTS (err u406))
++(define-constant ERR_INVALID_STATUS (err u407))
++(define-constant ERR_NOT_FUNDED (err u408))
++(define-constant ERR_NOT_SHIPPED (err u409))
++(define-constant ERR_ALREADY_RELEASED (err u410))
++(define-constant ERR_ALREADY_DISPUTED (err u411))
++(define-constant ERR_AUTO_RELEASE_NOT_READY (err u412))
++(define-constant ERR_TRANSFER_FAILED (err u413))
++(define-constant ERR_EMPTY_HASH (err u414))
++(define-constant ERR_STORAGE_ERROR (err u415))
++
++;; Escrow status constants (mirror from storage)
++(define-constant ESCROW_STATUS_PENDING u0)
++(define-constant ESCROW_STATUS_FUNDED u1)
++(define-constant ESCROW_STATUS_SHIPPED u2)
++(define-constant ESCROW_STATUS_DELIVERED u3)
++(define-constant ESCROW_STATUS_RELEASED u4)
++(define-constant ESCROW_STATUS_DISPUTED u5)
++(define-constant ESCROW_STATUS_REFUNDED u6)
++
++;; Resolution types
++(define-constant RESOLUTION_PENDING u0)
++(define-constant RESOLUTION_RELEASE_TO_EXPORTER u1)
++(define-constant RESOLUTION_REFUND_TO_IMPORTER u2)
++(define-constant RESOLUTION_PARTIAL u3)
++
++;; Read-only functions
++
++(define-read-only (get-info)
++  (ok {version: VERSION})
++)
++
++(define-read-only (get-escrow (order-id uint))
++  (contract-call? .escrow-storage get-escrow-by-order order-id)
++)
++
++(define-read-only (get-escrow-status (order-id uint))
++  (match (contract-call? .escrow-storage get-escrow-by-order order-id)
++    escrow-data (ok (get status escrow-data))
++    (err u404)
++  )
++)
++
++(define-read-only (get-shipment-info (order-id uint))
++  (match (contract-call? .escrow-storage get-escrow-id-by-order order-id)
++    escrow-id (contract-call? .escrow-storage get-shipment-tracking escrow-id)
++    none
++  )
++)
++
++(define-read-only (can-auto-release (order-id uint))
++  (match (contract-call? .escrow-storage get-escrow-id-by-order order-id)
++    escrow-id (ok (contract-call? .escrow-storage is-auto-releasable escrow-id))
++    (err u404)
++  )
++)
++
++;; Public functions
++
++;; @Desc Create an escrow for a purchase order
++;; @Param order-id: The purchase order ID
++(define-public (create-escrow (order-id uint))
++  (let (
++    (order (unwrap! (contract-call? .purchase-order-storage get-purchase-order order-id) ERR_ORDER_NOT_FOUND))
++    (status-data (unwrap! (contract-call? .purchase-order-storage get-order-status order-id) ERR_ORDER_NOT_FOUND))
++    (terms (unwrap! (contract-call? .purchase-order-storage get-payment-terms-detail order-id) ERR_ORDER_NOT_FOUND))
++    (exporter-id (get exporter-id order))
++    (importer-id (get importer-id order))
++    (amount (get amount order))
++  )
++    ;; Verify order is signed by both parties
++    (asserts! (and (get exporter-signed status-data) (get importer-signed status-data)) ERR_INVALID_STATUS)
++    ;; Verify payment terms are approved
++    (asserts! (get approved-by-counterparty terms) ERR_INVALID_STATUS)
++    ;; Verify no existing escrow
++    (asserts! (is-none (contract-call? .escrow-storage get-escrow-id-by-order order-id)) ERR_ESCROW_EXISTS)
++
++    ;; Get principal addresses from IDs
++    (let (
++      (exporter-principal (unwrap! (contract-call? .exporter-storage get-exporter-principal-by-id exporter-id) ERR_ORDER_NOT_FOUND))
++      (importer-principal (unwrap! (contract-call? .importer-storage get-importer-principal-by-id importer-id) ERR_ORDER_NOT_FOUND))
++      (downpayment (get downpayment-amount terms))
++      (balance (get balance-amount terms))
++    )
++      ;; Create the escrow
++      (let (
++        (escrow-id (unwrap! (contract-call? .escrow-storage create-escrow
++          order-id
++          exporter-principal
++          importer-principal
++          amount
++          downpayment
++          balance
++        ) ERR_STORAGE_ERROR))
++      )
++        ;; Increment nonce
++        (unwrap! (contract-call? .escrow-storage increment-escrow-id-nonce) ERR_STORAGE_ERROR)
++
++        (print {action: "escrow-created", order-id: order-id, escrow-id: escrow-id})
++        (ok escrow-id)
++      )
++    )
++  )
++)
++
++;; @Desc Fund the escrow (importer deposits funds)
++;; @Param order-id: The purchase order ID
++(define-public (fund-escrow (order-id uint))
++  (let (
++    (escrow-id (unwrap! (contract-call? .escrow-storage get-escrow-id-by-order order-id) ERR_ESCROW_NOT_FOUND))
++    (escrow (unwrap! (contract-call? .escrow-storage get-escrow escrow-id) ERR_ESCROW_NOT_FOUND))
++  )
++    ;; Verify caller is the importer
++    (asserts! (is-eq tx-sender (get importer escrow)) ERR_UNAUTHORIZED)
++    ;; Verify escrow is pending
++    (asserts! (is-eq (get status escrow) ESCROW_STATUS_PENDING) ERR_INVALID_STATUS)
++
++    ;; Transfer funds from importer to contract
++    (let (
++      (total-amount (get amount escrow))
++    )
++      (unwrap! (contract-call? .token-susdt transfer total-amount tx-sender (as-contract tx-sender) none) ERR_TRANSFER_FAILED)
++
++      ;; Mark escrow as funded
++      (unwrap! (contract-call? .escrow-storage mark-escrow-funded escrow-id) ERR_STORAGE_ERROR)
++
++      (print {action: "escrow-funded", order-id: order-id, escrow-id: escrow-id, amount: total-amount})
++      (ok true)
++    )
++  )
++)
++
++;; @Desc Confirm shipment and upload tracking info
++;; @Param order-id: The purchase order ID
++;; @Param carrier: Shipping carrier name
++;; @Param tracking-number: Tracking number
++;; @Param estimated-delivery: Estimated delivery block height
++;; @Param tracking-hash: Hash of tracking document
++(define-public (confirm-shipment
++  (order-id uint)
++  (carrier (string-utf8 100))
++  (tracking-number (string-utf8 100))
++  (estimated-delivery uint)
++  (tracking-hash (buff 256)))
++  (let (
++    (escrow-id (unwrap! (contract-call? .escrow-storage get-escrow-id-by-order order-id) ERR_ESCROW_NOT_FOUND))
++    (escrow (unwrap! (contract-call? .escrow-storage get-escrow escrow-id) ERR_ESCROW_NOT_FOUND))
++  )
++    ;; Verify caller is the exporter
++    (asserts! (is-eq tx-sender (get exporter escrow)) ERR_UNAUTHORIZED)
++    ;; Verify escrow is funded
++    (asserts! (is-eq (get status escrow) ESCROW_STATUS_FUNDED) ERR_NOT_FUNDED)
++    ;; Verify hash not empty
++    (asserts! (> (len tracking-hash) u0) ERR_EMPTY_HASH)
++
++    ;; Add shipment tracking
++    (unwrap! (contract-call? .escrow-storage add-shipment-tracking
++      escrow-id
++      carrier
++      tracking-number
++      estimated-delivery
++      tracking-hash
++    ) ERR_STORAGE_ERROR)
++
++    ;; Mark escrow as shipped
++    (unwrap! (contract-call? .escrow-storage mark-escrow-shipped escrow-id tracking-hash) ERR_STORAGE_ERROR)
++
++    (print {action: "shipment-confirmed", order-id: order-id, escrow-id: escrow-id, carrier: carrier})
++    (ok true)
++  )
++)
++
++;; @Desc Upload proof of delivery document
++;; @Param order-id: The purchase order ID
++;; @Param doc-type: Type of document (e.g., "bill-of-lading", "delivery-receipt")
++;; @Param doc-hash: Hash of the document
++(define-public (upload-delivery-proof
++  (order-id uint)
++  (doc-type (string-utf8 50))
++  (doc-hash (buff 256)))
++  (let (
++    (escrow-id (unwrap! (contract-call? .escrow-storage get-escrow-id-by-order order-id) ERR_ESCROW_NOT_FOUND))
++    (escrow (unwrap! (contract-call? .escrow-storage get-escrow escrow-id) ERR_ESCROW_NOT_FOUND))
++  )
++    ;; Verify caller is exporter or importer
++    (asserts! (or (is-eq tx-sender (get exporter escrow)) (is-eq tx-sender (get importer escrow))) ERR_UNAUTHORIZED)
++    ;; Verify escrow is shipped or delivered
++    (asserts! (or (is-eq (get status escrow) ESCROW_STATUS_SHIPPED) (is-eq (get status escrow) ESCROW_STATUS_DELIVERED)) ERR_NOT_SHIPPED)
++    ;; Verify hash not empty
++    (asserts! (> (len doc-hash) u0) ERR_EMPTY_HASH)
++
++    ;; Add delivery document
++    (let (
++      (doc-index (unwrap! (contract-call? .escrow-storage add-delivery-document
++        escrow-id
++        doc-type
++        doc-hash
++        tx-sender
++      ) ERR_STORAGE_ERROR))
++    )
++      (print {action: "delivery-proof-uploaded", order-id: order-id, escrow-id: escrow-id, doc-type: doc-type, doc-index: doc-index})
++      (ok doc-index)
++    )
++  )
++)
++
++;; @Desc Confirm delivery (importer confirms receipt of goods)
++;; @Param order-id: The purchase order ID
++;; @Param delivery-hash: Hash of delivery confirmation
++(define-public (confirm-delivery (order-id uint) (delivery-hash (buff 256)))
++  (let (
++    (escrow-id (unwrap! (contract-call? .escrow-storage get-escrow-id-by-order order-id) ERR_ESCROW_NOT_FOUND))
++    (escrow (unwrap! (contract-call? .escrow-storage get-escrow escrow-id) ERR_ESCROW_NOT_FOUND))
++  )
++    ;; Verify caller is the importer
++    (asserts! (is-eq tx-sender (get importer escrow)) ERR_UNAUTHORIZED)
++    ;; Verify escrow is shipped
++    (asserts! (is-eq (get status escrow) ESCROW_STATUS_SHIPPED) ERR_NOT_SHIPPED)
++    ;; Verify hash not empty
++    (asserts! (> (len delivery-hash) u0) ERR_EMPTY_HASH)
++
++    ;; Mark escrow as delivered
++    (unwrap! (contract-call? .escrow-storage mark-escrow-delivered escrow-id delivery-hash) ERR_STORAGE_ERROR)
++
++    (print {action: "delivery-confirmed", order-id: order-id, escrow-id: escrow-id})
++    (ok true)
++  )
++)
++
++;; @Desc Release funds to exporter after delivery confirmation
++;; @Param order-id: The purchase order ID
++(define-public (release-funds (order-id uint))
++  (let (
++    (escrow-id (unwrap! (contract-call? .escrow-storage get-escrow-id-by-order order-id) ERR_ESCROW_NOT_FOUND))
++    (escrow (unwrap! (contract-call? .escrow-storage get-escrow escrow-id) ERR_ESCROW_NOT_FOUND))
++  )
++    ;; Verify caller is the importer (who releases funds)
++    (asserts! (is-eq tx-sender (get importer escrow)) ERR_UNAUTHORIZED)
++    ;; Verify escrow is delivered
++    (asserts! (is-eq (get status escrow) ESCROW_STATUS_DELIVERED) ERR_INVALID_STATUS)
++    ;; Verify not already released
++    (asserts! (not (is-eq (get status escrow) ESCROW_STATUS_RELEASED)) ERR_ALREADY_RELEASED)
++
++    ;; Transfer funds to exporter
++    (let (
++      (amount (get amount escrow))
++      (exporter (get exporter escrow))
++    )
++      (unwrap! (as-contract (contract-call? .token-susdt transfer amount tx-sender exporter none)) ERR_TRANSFER_FAILED)
++
++      ;; Mark escrow as released
++      (unwrap! (contract-call? .escrow-storage mark-escrow-released escrow-id) ERR_STORAGE_ERROR)
++
++      (print {action: "funds-released", order-id: order-id, escrow-id: escrow-id, amount: amount, exporter: exporter})
++      (ok true)
++    )
++  )
++)
++
++;; @Desc Auto-release funds after timeout (anyone can call)
++;; @Param order-id: The purchase order ID
++(define-public (auto-release-funds (order-id uint))
++  (let (
++    (escrow-id (unwrap! (contract-call? .escrow-storage get-escrow-id-by-order order-id) ERR_ESCROW_NOT_FOUND))
++    (escrow (unwrap! (contract-call? .escrow-storage get-escrow escrow-id) ERR_ESCROW_NOT_FOUND))
++  )
++    ;; Verify escrow is shipped (auto-release only after shipment)
++    (asserts! (is-eq (get status escrow) ESCROW_STATUS_SHIPPED) ERR_NOT_SHIPPED)
++    ;; Verify auto-release time has passed
++    (asserts! (contract-call? .escrow-storage is-auto-releasable escrow-id) ERR_AUTO_RELEASE_NOT_READY)
++    ;; Verify not disputed
++    (asserts! (not (is-eq (get status escrow) ESCROW_STATUS_DISPUTED)) ERR_ALREADY_DISPUTED)
++
++    ;; Transfer funds to exporter
++    (let (
++      (amount (get amount escrow))
++      (exporter (get exporter escrow))
++    )
++      (unwrap! (as-contract (contract-call? .token-susdt transfer amount tx-sender exporter none)) ERR_TRANSFER_FAILED)
++
++      ;; Mark escrow as released
++      (unwrap! (contract-call? .escrow-storage mark-escrow-released escrow-id) ERR_STORAGE_ERROR)
++
++      (print {action: "funds-auto-released", order-id: order-id, escrow-id: escrow-id, amount: amount, exporter: exporter})
++      (ok true)
++    )
++  )
++)
++
++;; @Desc Raise a dispute before fund release
++;; @Param order-id: The purchase order ID
++;; @Param reason: Dispute reason
++(define-public (raise-dispute (order-id uint) (reason (string-utf8 500)))
++  (let (
++    (escrow-id (unwrap! (contract-call? .escrow-storage get-escrow-id-by-order order-id) ERR_ESCROW_NOT_FOUND))
++    (escrow (unwrap! (contract-call? .escrow-storage get-escrow escrow-id) ERR_ESCROW_NOT_FOUND))
++  )
++    ;; Verify caller is exporter or importer
++    (asserts! (or (is-eq tx-sender (get exporter escrow)) (is-eq tx-sender (get importer escrow))) ERR_UNAUTHORIZED)
++    ;; Verify escrow is shipped (can only dispute after shipment, before release)
++    (asserts! (is-eq (get status escrow) ESCROW_STATUS_SHIPPED) ERR_INVALID_STATUS)
++    ;; Verify not already disputed or released
++    (asserts! (not (is-eq (get status escrow) ESCROW_STATUS_DISPUTED)) ERR_ALREADY_DISPUTED)
++    (asserts! (not (is-eq (get status escrow) ESCROW_STATUS_RELEASED)) ERR_ALREADY_RELEASED)
++
++    ;; Create dispute record
++    (unwrap! (contract-call? .escrow-storage create-dispute escrow-id tx-sender reason) ERR_STORAGE_ERROR)
++
++    ;; Mark escrow as disputed
++    (unwrap! (contract-call? .escrow-storage mark-escrow-disputed escrow-id) ERR_STORAGE_ERROR)
++
++    (print {action: "dispute-raised", order-id: order-id, escrow-id: escrow-id, raised-by: tx-sender})
++    (ok true)
++  )
++)
++
++;; @Desc Request refund (only in disputed state, requires resolution)
++;; @Param order-id: The purchase order ID
++(define-public (request-refund (order-id uint))
++  (let (
++    (escrow-id (unwrap! (contract-call? .escrow-storage get-escrow-id-by-order order-id) ERR_ESCROW_NOT_FOUND))
++    (escrow (unwrap! (contract-call? .escrow-storage get-escrow escrow-id) ERR_ESCROW_NOT_FOUND))
++    (dispute (unwrap! (contract-call? .escrow-storage get-dispute escrow-id) ERR_INVALID_STATUS))
++  )
++    ;; Verify caller is the importer
++    (asserts! (is-eq tx-sender (get importer escrow)) ERR_UNAUTHORIZED)
++    ;; Verify escrow is disputed
++    (asserts! (is-eq (get status escrow) ESCROW_STATUS_DISPUTED) ERR_INVALID_STATUS)
++    ;; Verify dispute resolved in favor of importer
++    (asserts! (get resolved dispute) ERR_INVALID_STATUS)
++    (asserts! (is-eq (get resolution-type dispute) RESOLUTION_REFUND_TO_IMPORTER) ERR_INVALID_STATUS)
++
++    ;; Transfer funds back to importer
++    (let (
++      (amount (get amount escrow))
++      (importer (get importer escrow))
++    )
++      (unwrap! (as-contract (contract-call? .token-susdt transfer amount tx-sender importer none)) ERR_TRANSFER_FAILED)
++
++      ;; Mark escrow as refunded
++      (unwrap! (contract-call? .escrow-storage mark-escrow-refunded escrow-id) ERR_STORAGE_ERROR)
++
++      (print {action: "funds-refunded", order-id: order-id, escrow-id: escrow-id, amount: amount, importer: importer})
++      (ok true)
++    )
++  )
++)
+diff --git a/packages/clarity/unit-tests/taral-escrow.test.ts b/packages/clarity/unit-tests/taral-escrow.test.ts
+new file mode 100644
+index 00000000..b78d5038
+--- /dev/null
++++ b/packages/clarity/unit-tests/taral-escrow.test.ts
+@@ -0,0 +1,526 @@
++import { describe, it, expect, beforeEach } from "vitest";
++import { Cl, ClarityValue } from "@stacks/transactions";
++
++// Test addresses
++const deployer = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM";
++const exporter = "ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5";
++const importer = "ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG";
++const thirdParty = "ST2JHG361ZXG51QTKY2NQCVBPPRRE2KZB1HR05NNC";
++
++describe("Taral Escrow Contract Tests", () => {
++  // Helper to create a test hash
++  const createTestHash = (seed: string): Uint8Array => {
++    const hash = new Uint8Array(32);
++    for (let i = 0; i < 32 && i < seed.length; i++) {
++      hash[i] = seed.charCodeAt(i);
++    }
++    return hash;
++  };
++
++  describe("Escrow Storage Tests", () => {
++    it("should create an escrow", async () => {
++      const { result } = simnet.callPublicFn(
++        "escrow-storage",
++        "create-escrow",
++        [
++          Cl.uint(10001), // order-id
++          Cl.standardPrincipal(exporter),
++          Cl.standardPrincipal(importer),
++          Cl.uint(1000000), // amount
++          Cl.uint(300000), // downpayment
++          Cl.uint(700000), // balance
++        ],
++        deployer
++      );
++
++      expect(result).toBeOk(Cl.uint(1)); // First escrow ID is 1
++    });
++
++    it("should increment escrow nonce", async () => {
++      // Create first escrow
++      simnet.callPublicFn(
++        "escrow-storage",
++        "create-escrow",
++        [
++          Cl.uint(10001),
++          Cl.standardPrincipal(exporter),
++          Cl.standardPrincipal(importer),
++          Cl.uint(1000000),
++          Cl.uint(300000),
++          Cl.uint(700000),
++        ],
++        deployer
++      );
++
++      simnet.callPublicFn(
++        "escrow-storage",
++        "increment-escrow-id-nonce",
++        [],
++        deployer
++      );
++
++      // Check nonce
++      const { result } = simnet.callReadOnlyFn(
++        "escrow-storage",
++        "get-escrow-id-nonce",
++        [],
++        deployer
++      );
++
++      expect(result).toBeUint(2);
++    });
++
++    it("should get escrow by order ID", async () => {
++      // Create escrow
++      simnet.callPublicFn(
++        "escrow-storage",
++        "create-escrow",
++        [
++          Cl.uint(10002),
++          Cl.standardPrincipal(exporter),
++          Cl.standardPrincipal(importer),
++          Cl.uint(2000000),
++          Cl.uint(500000),
++          Cl.uint(1500000),
++        ],
++        deployer
++      );
++
++      // Get escrow by order
++      const { result } = simnet.callReadOnlyFn(
++        "escrow-storage",
++        "get-escrow-by-order",
++        [Cl.uint(10002)],
++        deployer
++      );
++
++      // Result should not be none
++      expect(result).not.toBeNone();
++    });
++
++    it("should mark escrow as funded", async () => {
++      // Create escrow first
++      simnet.callPublicFn(
++        "escrow-storage",
++        "create-escrow",
++        [
++          Cl.uint(10003),
++          Cl.standardPrincipal(exporter),
++          Cl.standardPrincipal(importer),
++          Cl.uint(1000000),
++          Cl.uint(300000),
++          Cl.uint(700000),
++        ],
++        deployer
++      );
++
++      // Mark as funded
++      const { result } = simnet.callPublicFn(
++        "escrow-storage",
++        "mark-escrow-funded",
++        [Cl.uint(1)],
++        deployer
++      );
++
++      expect(result).toBeOk(Cl.bool(true));
++
++      // Verify status
++      const escrow = simnet.callReadOnlyFn(
++        "escrow-storage",
++        "get-escrow",
++        [Cl.uint(1)],
++        deployer
++      );
++
++      expect(escrow.result).not.toBeNone();
++    });
++
++    it("should mark escrow as shipped", async () => {
++      // Create and fund escrow
++      simnet.callPublicFn(
++        "escrow-storage",
++        "create-escrow",
++        [
++          Cl.uint(10004),
++          Cl.standardPrincipal(exporter),
++          Cl.standardPrincipal(importer),
++          Cl.uint(1000000),
++          Cl.uint(300000),
++          Cl.uint(700000),
++        ],
++        deployer
++      );
++
++      simnet.callPublicFn(
++        "escrow-storage",
++        "mark-escrow-funded",
++        [Cl.uint(1)],
++        deployer
++      );
++
++      // Mark as shipped
++      const shipmentHash = createTestHash("shipment123");
++      const { result } = simnet.callPublicFn(
++        "escrow-storage",
++        "mark-escrow-shipped",
++        [Cl.uint(1), Cl.buffer(shipmentHash)],
++        deployer
++      );
++
++      expect(result).toBeOk(Cl.bool(true));
++    });
++
++    it("should add shipment tracking", async () => {
++      const trackingHash = createTestHash("tracking456");
++      const { result } = simnet.callPublicFn(
++        "escrow-storage",
++        "add-shipment-tracking",
++        [
++          Cl.uint(1),
++          Cl.stringUtf8("DHL Express"),
++          Cl.stringUtf8("1234567890"),
++          Cl.uint(100), // estimated delivery block
++          Cl.buffer(trackingHash),
++        ],
++        deployer
++      );
++
++      expect(result).toBeOk(Cl.bool(true));
++
++      // Verify tracking
++      const tracking = simnet.callReadOnlyFn(
++        "escrow-storage",
++        "get-shipment-tracking",
++        [Cl.uint(1)],
++        deployer
++      );
++
++      expect(tracking.result).not.toBeNone();
++    });
++
++    it("should add delivery document", async () => {
++      const docHash = createTestHash("document789");
++      const { result } = simnet.callPublicFn(
++        "escrow-storage",
++        "add-delivery-document",
++        [
++          Cl.uint(1),
++          Cl.stringUtf8("bill-of-lading"),
++          Cl.buffer(docHash),
++          Cl.standardPrincipal(exporter),
++        ],
++        deployer
++      );
++
++      expect(result).toBeOk(Cl.uint(0)); // First document index is 0
++
++      // Verify document count
++      const count = simnet.callReadOnlyFn(
++        "escrow-storage",
++        "get-escrow-doc-count",
++        [Cl.uint(1)],
++        deployer
++      );
++
++      const countTuple = count.result as any;
++      expect(countTuple.data.count).toBeUint(1);
++    });
++
++    it("should create and resolve dispute", async () => {
++      // Create dispute
++      const { result: createResult } = simnet.callPublicFn(
++        "escrow-storage",
++        "create-dispute",
++        [
++          Cl.uint(1),
++          Cl.standardPrincipal(importer),
++          Cl.stringUtf8("Goods damaged during shipping"),
++        ],
++        deployer
++      );
++
++      expect(createResult).toBeOk(Cl.bool(true));
++
++      // Resolve dispute
++      const { result: resolveResult } = simnet.callPublicFn(
++        "escrow-storage",
++        "resolve-dispute",
++        [
++          Cl.uint(1),
++          Cl.stringUtf8("Partial refund agreed"),
++          Cl.uint(3), // RESOLUTION_PARTIAL
++        ],
++        deployer
++      );
++
++      expect(resolveResult).toBeOk(Cl.bool(true));
++
++      // Verify dispute
++      const dispute = simnet.callReadOnlyFn(
++        "escrow-storage",
++        "get-dispute",
++        [Cl.uint(1)],
++        deployer
++      );
++
++      expect(dispute.result).not.toBeNone();
++    });
++
++    it("should check auto-release status", async () => {
++      // Create escrow
++      simnet.callPublicFn(
++        "escrow-storage",
++        "create-escrow",
++        [
++          Cl.uint(10005),
++          Cl.standardPrincipal(exporter),
++          Cl.standardPrincipal(importer),
++          Cl.uint(1000000),
++          Cl.uint(300000),
++          Cl.uint(700000),
++        ],
++        deployer
++      );
++
++      // Not auto-releasable yet (not shipped)
++      const { result } = simnet.callReadOnlyFn(
++        "escrow-storage",
++        "is-auto-releasable",
++        [Cl.uint(1)],
++        deployer
++      );
++
++      expect(result).toBeBool(false);
++    });
++  });
++
++  describe("Escrow Status Transitions", () => {
++    it("should transition through status states correctly", async () => {
++      // Create escrow (PENDING)
++      simnet.callPublicFn(
++        "escrow-storage",
++        "create-escrow",
++        [
++          Cl.uint(10006),
++          Cl.standardPrincipal(exporter),
++          Cl.standardPrincipal(importer),
++          Cl.uint(1000000),
++          Cl.uint(300000),
++          Cl.uint(700000),
++        ],
++        deployer
++      );
++
++      // Mark funded (FUNDED)
++      simnet.callPublicFn(
++        "escrow-storage",
++        "mark-escrow-funded",
++        [Cl.uint(1)],
++        deployer
++      );
++
++      // Mark shipped (SHIPPED)
++      const shipmentHash = createTestHash("ship");
++      simnet.callPublicFn(
++        "escrow-storage",
++        "mark-escrow-shipped",
++        [Cl.uint(1), Cl.buffer(shipmentHash)],
++        deployer
++      );
++
++      // Mark delivered (DELIVERED)
++      const deliveryHash = createTestHash("deliver");
++      simnet.callPublicFn(
++        "escrow-storage",
++        "mark-escrow-delivered",
++        [Cl.uint(1), Cl.buffer(deliveryHash)],
++        deployer
++      );
++
++      // Mark released (RELEASED)
++      const { result } = simnet.callPublicFn(
++        "escrow-storage",
++        "mark-escrow-released",
++        [Cl.uint(1)],
++        deployer
++      );
++
++      expect(result).toBeOk(Cl.bool(true));
++    });
++
++    it("should handle dispute status", async () => {
++      // Create escrow
++      simnet.callPublicFn(
++        "escrow-storage",
++        "create-escrow",
++        [
++          Cl.uint(10007),
++          Cl.standardPrincipal(exporter),
++          Cl.standardPrincipal(importer),
++          Cl.uint(1000000),
++          Cl.uint(300000),
++          Cl.uint(700000),
++        ],
++        deployer
++      );
++
++      // Mark disputed
++      const { result } = simnet.callPublicFn(
++        "escrow-storage",
++        "mark-escrow-disputed",
++        [Cl.uint(1)],
++        deployer
++      );
++
++      expect(result).toBeOk(Cl.bool(true));
++    });
++
++    it("should handle refund status", async () => {
++      // Create escrow
++      simnet.callPublicFn(
++        "escrow-storage",
++        "create-escrow",
++        [
++          Cl.uint(10008),
++          Cl.standardPrincipal(exporter),
++          Cl.standardPrincipal(importer),
++          Cl.uint(1000000),
++          Cl.uint(300000),
++          Cl.uint(700000),
++        ],
++        deployer
++      );
++
++      // Mark refunded
++      const { result } = simnet.callPublicFn(
++        "escrow-storage",
++        "mark-escrow-refunded",
++        [Cl.uint(1)],
++        deployer
++      );
++
++      expect(result).toBeOk(Cl.bool(true));
++    });
++  });
++
++  describe("Document Management", () => {
++    it("should verify delivery document", async () => {
++      // Create escrow first
++      simnet.callPublicFn(
++        "escrow-storage",
++        "create-escrow",
++        [
++          Cl.uint(10009),
++          Cl.standardPrincipal(exporter),
++          Cl.standardPrincipal(importer),
++          Cl.uint(1000000),
++          Cl.uint(300000),
++          Cl.uint(700000),
++        ],
++        deployer
++      );
++
++      // Add document
++      const docHash = createTestHash("doc");
++      simnet.callPublicFn(
++        "escrow-storage",
++        "add-delivery-document",
++        [
++          Cl.uint(1),
++          Cl.stringUtf8("customs-declaration"),
++          Cl.buffer(docHash),
++          Cl.standardPrincipal(exporter),
++        ],
++        deployer
++      );
++
++      // Verify document
++      const { result } = simnet.callPublicFn(
++        "escrow-storage",
++        "verify-delivery-document",
++        [Cl.uint(1), Cl.uint(0)],
++        deployer
++      );
++
++      expect(result).toBeOk(Cl.bool(true));
++
++      // Check document is verified
++      const doc = simnet.callReadOnlyFn(
++        "escrow-storage",
++        "get-delivery-document",
++        [Cl.uint(1), Cl.uint(0)],
++        deployer
++      );
++
++      expect(doc.result).not.toBeNone();
++    });
++
++    it("should track multiple documents per escrow", async () => {
++      // Create escrow
++      simnet.callPublicFn(
++        "escrow-storage",
++        "create-escrow",
++        [
++          Cl.uint(10010),
++          Cl.standardPrincipal(exporter),
++          Cl.standardPrincipal(importer),
++          Cl.uint(1000000),
++          Cl.uint(300000),
++          Cl.uint(700000),
++        ],
++        deployer
++      );
++
++      // Add multiple documents
++      const docTypes = ["bill-of-lading", "customs-form", "delivery-receipt"];
++      for (let i = 0; i < docTypes.length; i++) {
++        const docHash = createTestHash(`doc${i}`);
++        simnet.callPublicFn(
++          "escrow-storage",
++          "add-delivery-document",
++          [
++            Cl.uint(1),
++            Cl.stringUtf8(docTypes[i]),
++            Cl.buffer(docHash),
++            Cl.standardPrincipal(exporter),
++          ],
++          deployer
++        );
++      }
++
++      // Check document count
++      const count = simnet.callReadOnlyFn(
++        "escrow-storage",
++        "get-escrow-doc-count",
++        [Cl.uint(1)],
++        deployer
++      );
++
++      const countTuple = count.result as any;
++      expect(countTuple.data.count).toBeUint(3);
++    });
++  });
++
++  describe("Auto-Release Configuration", () => {
++    it("should allow setting auto-release blocks", async () => {
++      const { result } = simnet.callPublicFn(
++        "escrow-storage",
++        "set-auto-release-blocks",
++        [Cl.uint(4032)], // ~28 days
++        deployer
++      );
++
++      expect(result).toBeOk(Cl.bool(true));
++
++      // Verify setting
++      const blocks = simnet.callReadOnlyFn(
++        "escrow-storage",
++        "get-auto-release-blocks",
++        [],
++        deployer
++      );
++
++      expect(blocks.result).toBeUint(4032);
++    });
++  });
++});
