@@ -1,0 +1,785 @@
+diff --git a/apps/frontend/src/components/modal/contractViewerModal.tsx b/apps/frontend/src/components/modal/contractViewerModal.tsx
+index bed3acf7..f98a34d9 100644
+--- a/apps/frontend/src/components/modal/contractViewerModal.tsx
++++ b/apps/frontend/src/components/modal/contractViewerModal.tsx
+@@ -37,7 +37,7 @@ function ContractViewerModal({
+   userRole,
+   onSignSuccess,
+ }: Props) {
+-  const { isSignedIn, stxAddress } = useTaralContracts();
++  const { isSignedIn, stxAddress, signAsExporter, signAsImporter, rejectOrder } = useTaralContracts();
+   const [actionState, setActionState] = useState<ActionState>("idle");
+   const [showRejectForm, setShowRejectForm] = useState(false);
+   const [rejectionReason, setRejectionReason] = useState("");
+@@ -101,9 +101,12 @@ function ContractViewerModal({
+     setActionState("signing");
+ 
+     try {
+-      // TODO: Call the actual signing contract function
+-      // For now, simulate the signing process
+-      await new Promise((resolve) => setTimeout(resolve, 2000));
++      // Call the appropriate signing function based on user role
++      if (userRole === "exporter") {
++        await signAsExporter(orderId);
++      } else {
++        await signAsImporter(orderId);
++      }
+ 
+       setActionState("success");
+       toast.success("Contract signed successfully!");
+@@ -127,8 +130,8 @@ function ContractViewerModal({
+     setActionState("rejecting");
+ 
+     try {
+-      // TODO: Call the actual rejection contract function
+-      await new Promise((resolve) => setTimeout(resolve, 2000));
++      // Call the reject order contract function
++      await rejectOrder(orderId, rejectionReason);
+ 
+       setActionState("success");
+       toast.success("Contract rejected");
+diff --git a/apps/frontend/src/components/modal/paymentTermsApprovalModal.tsx b/apps/frontend/src/components/modal/paymentTermsApprovalModal.tsx
+new file mode 100644
+index 00000000..2df29f56
+--- /dev/null
++++ b/apps/frontend/src/components/modal/paymentTermsApprovalModal.tsx
+@@ -0,0 +1,410 @@
++import {
++  faClose,
++  faCheckCircle,
++  faSpinner,
++  faFileContract,
++  faTimesCircle,
++} from "@fortawesome/free-solid-svg-icons";
++import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
++import useTaralContracts from "@hooks/useTaralContracts";
++import { useState, useEffect } from "react";
++import { toast } from "sonner";
++
++type PaymentTermsData = {
++  termsHash: string;
++  downpaymentAmount: number;
++  balanceAmount: number;
++  paymentDurationDays: number;
++  interestRate: number;
++  submittedBy: string;
++  approvedByCounterparty: boolean;
++  submittedAt: number;
++};
++
++type Props = {
++  isOpen: boolean;
++  onClose: () => void;
++  orderId: number;
++  userRole: "exporter" | "importer";
++  onApprovalSuccess?: () => void;
++};
++
++type ActionState = "idle" | "loading" | "approving" | "success" | "error";
++
++function PaymentTermsApprovalModal({
++  isOpen,
++  onClose,
++  orderId,
++  userRole,
++  onApprovalSuccess,
++}: Props) {
++  const { isSignedIn, stxAddress, approvePaymentTerms, getPaymentTermsDetail } = useTaralContracts();
++  const [actionState, setActionState] = useState<ActionState>("idle");
++  const [termsData, setTermsData] = useState<PaymentTermsData | null>(null);
++
++  useEffect(() => {
++    if (isOpen && orderId) {
++      loadPaymentTerms();
++    }
++  }, [isOpen, orderId]);
++
++  const loadPaymentTerms = async () => {
++    setActionState("loading");
++    try {
++      const data = await getPaymentTermsDetail(orderId);
++      if (data) {
++        setTermsData({
++          termsHash: data["terms-hash"] || "",
++          downpaymentAmount: Number(data["downpayment-amount"]) || 0,
++          balanceAmount: Number(data["balance-amount"]) || 0,
++          paymentDurationDays: Number(data["payment-duration-days"]) || 0,
++          interestRate: Number(data["interest-rate"]) || 0,
++          submittedBy: data["submitted-by"] || "",
++          approvedByCounterparty: data["approved-by-counterparty"] || false,
++          submittedAt: Number(data["submitted-at"]) || 0,
++        });
++      }
++      setActionState("idle");
++    } catch (error) {
++      console.error("Error loading payment terms:", error);
++      setActionState("error");
++    }
++  };
++
++  const truncateAddress = (address: string) => {
++    if (!address) return "";
++    return `${address.slice(0, 8)}...${address.slice(-8)}`;
++  };
++
++  const formatAmount = (amount: number) => {
++    return new Intl.NumberFormat("en-US", {
++      style: "currency",
++      currency: "USD",
++    }).format(amount / 1000000);
++  };
++
++  const formatInterestRate = (basisPoints: number) => {
++    return `${(basisPoints / 100).toFixed(2)}%`;
++  };
++
++  const handleApprove = async () => {
++    if (!isSignedIn) {
++      toast.error("Please connect your wallet first");
++      return;
++    }
++
++    setActionState("approving");
++
++    try {
++      await approvePaymentTerms(orderId);
++
++      setActionState("success");
++      toast.success("Payment terms approved!");
++
++      if (onApprovalSuccess) {
++        onApprovalSuccess();
++      }
++    } catch (error: any) {
++      console.error("Error approving payment terms:", error);
++      setActionState("error");
++      toast.error(error.message || "Failed to approve payment terms");
++    }
++  };
++
++  const handleClose = () => {
++    setActionState("idle");
++    onClose();
++  };
++
++  const canApprove = () => {
++    if (!termsData || !isSignedIn || !stxAddress) return false;
++    // Can only approve if not already approved and you're not the submitter
++    return !termsData.approvedByCounterparty && termsData.submittedBy !== stxAddress;
++  };
++
++  if (!isOpen) return null;
++
++  return (
++    <div className={"newApplicationModal active"}>
++      <div className="modalMenue" style={{ maxWidth: "600px" }}>
++        <div onClick={handleClose} className="close">
++          <FontAwesomeIcon icon={faClose} />
++        </div>
++
++        <div className="form" style={{ flexDirection: "column", gap: "20px", padding: "20px" }}>
++          {/* Header */}
++          <div style={{ textAlign: "center", width: "100%" }}>
++            {actionState === "success" ? (
++              <FontAwesomeIcon
++                icon={faCheckCircle}
++                style={{ fontSize: "48px", color: "#4CAF50", marginBottom: "10px" }}
++              />
++            ) : (
++              <FontAwesomeIcon
++                icon={faFileContract}
++                style={{ fontSize: "36px", color: "#1976d2", marginBottom: "10px" }}
++              />
++            )}
++            <div className="header-application">
++              {actionState === "success"
++                ? "Payment Terms Approved!"
++                : "Review Payment Terms"}
++            </div>
++            <div className="info-application" style={{ marginTop: "5px" }}>
++              Order #{orderId}
++            </div>
++          </div>
++
++          {actionState === "loading" && (
++            <div style={{ textAlign: "center", padding: "40px" }}>
++              <FontAwesomeIcon
++                icon={faSpinner}
++                spin
++                style={{ fontSize: "32px", color: "#1976d2" }}
++              />
++              <p style={{ marginTop: "15px", color: "#666" }}>
++                Loading payment terms...
++              </p>
++            </div>
++          )}
++
++          {actionState === "success" && (
++            <div style={{ textAlign: "center", padding: "20px" }}>
++              <p>The payment terms have been approved.</p>
++              <p style={{ color: "#666", marginTop: "10px" }}>
++                The transaction can now proceed to the next stage.
++              </p>
++              <div style={{ marginTop: "20px" }}>
++                <button className="btn" onClick={handleClose}>
++                  Done
++                </button>
++              </div>
++            </div>
++          )}
++
++          {termsData && actionState !== "success" && actionState !== "loading" && (
++            <>
++              {/* Terms Summary */}
++              <div
++                style={{
++                  backgroundColor: "#f5f5f5",
++                  padding: "20px",
++                  borderRadius: "8px",
++                  width: "100%",
++                }}
++              >
++                <h4 style={{ marginBottom: "15px", color: "#333" }}>
++                  Payment Terms Details
++                </h4>
++                <div
++                  style={{
++                    display: "grid",
++                    gridTemplateColumns: "1fr 1fr",
++                    gap: "15px",
++                  }}
++                >
++                  <div>
++                    <span style={{ color: "#666", fontSize: "12px" }}>
++                      DOWNPAYMENT
++                    </span>
++                    <br />
++                    <span style={{ fontWeight: "bold", fontSize: "18px" }}>
++                      {formatAmount(termsData.downpaymentAmount)}
++                    </span>
++                  </div>
++                  <div>
++                    <span style={{ color: "#666", fontSize: "12px" }}>
++                      BALANCE
++                    </span>
++                    <br />
++                    <span style={{ fontWeight: "bold", fontSize: "18px" }}>
++                      {formatAmount(termsData.balanceAmount)}
++                    </span>
++                  </div>
++                  <div>
++                    <span style={{ color: "#666", fontSize: "12px" }}>
++                      PAYMENT DURATION
++                    </span>
++                    <br />
++                    <span style={{ fontWeight: "bold" }}>
++                      {termsData.paymentDurationDays} days
++                    </span>
++                  </div>
++                  <div>
++                    <span style={{ color: "#666", fontSize: "12px" }}>
++                      INTEREST RATE
++                    </span>
++                    <br />
++                    <span style={{ fontWeight: "bold" }}>
++                      {formatInterestRate(termsData.interestRate)}
++                    </span>
++                  </div>
++                </div>
++              </div>
++
++              {/* Submitter Info */}
++              <div
++                style={{
++                  backgroundColor: "#e8f4fd",
++                  padding: "15px",
++                  borderRadius: "8px",
++                  width: "100%",
++                }}
++              >
++                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
++                  <div>
++                    <span style={{ color: "#666", fontSize: "12px" }}>SUBMITTED BY</span>
++                    <br />
++                    <span style={{ fontFamily: "monospace", fontSize: "14px" }}>
++                      {truncateAddress(termsData.submittedBy)}
++                    </span>
++                  </div>
++                  <div style={{ textAlign: "right" }}>
++                    <span style={{ color: "#666", fontSize: "12px" }}>STATUS</span>
++                    <br />
++                    {termsData.approvedByCounterparty ? (
++                      <span style={{ color: "#4CAF50", fontWeight: "bold" }}>
++                        <FontAwesomeIcon icon={faCheckCircle} style={{ marginRight: "5px" }} />
++                        Approved
++                      </span>
++                    ) : (
++                      <span style={{ color: "#FFA500", fontWeight: "bold" }}>
++                        Awaiting Approval
++                      </span>
++                    )}
++                  </div>
++                </div>
++              </div>
++
++              {/* Hash Verification */}
++              <div
++                style={{
++                  backgroundColor: "#f9f9f9",
++                  padding: "15px",
++                  borderRadius: "8px",
++                  width: "100%",
++                }}
++              >
++                <span style={{ color: "#666", fontSize: "12px" }}>TERMS HASH</span>
++                <br />
++                <code
++                  style={{
++                    fontSize: "12px",
++                    backgroundColor: "white",
++                    padding: "8px",
++                    borderRadius: "4px",
++                    display: "inline-block",
++                    marginTop: "5px",
++                    wordBreak: "break-all",
++                  }}
++                >
++                  {termsData.termsHash}
++                </code>
++              </div>
++
++              {/* Action Buttons */}
++              {canApprove() && (
++                <div
++                  style={{
++                    display: "flex",
++                    gap: "15px",
++                    justifyContent: "center",
++                    marginTop: "10px",
++                  }}
++                >
++                  <button
++                    className="btn"
++                    style={{ backgroundColor: "#ccc", color: "#333" }}
++                    onClick={handleClose}
++                    disabled={actionState === "approving"}
++                  >
++                    Cancel
++                  </button>
++                  <button
++                    className="btn"
++                    style={{ backgroundColor: "#4CAF50" }}
++                    onClick={handleApprove}
++                    disabled={actionState === "approving"}
++                  >
++                    {actionState === "approving" ? (
++                      <>
++                        <FontAwesomeIcon
++                          icon={faSpinner}
++                          spin
++                          style={{ marginRight: "8px" }}
++                        />
++                        Approving...
++                      </>
++                    ) : (
++                      <>
++                        <FontAwesomeIcon
++                          icon={faCheckCircle}
++                          style={{ marginRight: "8px" }}
++                        />
++                        Approve Terms
++                      </>
++                    )}
++                  </button>
++                </div>
++              )}
++
++              {termsData.approvedByCounterparty && (
++                <div
++                  style={{
++                    color: "#4CAF50",
++                    textAlign: "center",
++                    fontSize: "14px",
++                    marginTop: "10px",
++                  }}
++                >
++                  These terms have already been approved.
++                </div>
++              )}
++
++              {!canApprove() && !termsData.approvedByCounterparty && termsData.submittedBy === stxAddress && (
++                <div
++                  style={{
++                    color: "#666",
++                    textAlign: "center",
++                    fontSize: "14px",
++                    marginTop: "10px",
++                  }}
++                >
++                  Waiting for counterparty approval. You submitted these terms.
++                </div>
++              )}
++
++              {!isSignedIn && (
++                <div
++                  style={{
++                    color: "#f44336",
++                    textAlign: "center",
++                    fontSize: "14px",
++                    marginTop: "10px",
++                  }}
++                >
++                  Please connect your wallet to approve these terms.
++                </div>
++              )}
++            </>
++          )}
++
++          {/* Close Button for non-success states */}
++          {actionState !== "success" && (
++            <div style={{ textAlign: "center", marginTop: "10px" }}>
++              <button
++                className="btn"
++                style={{ backgroundColor: "#666" }}
++                onClick={handleClose}
++              >
++                Close
++              </button>
++            </div>
++          )}
++        </div>
++      </div>
++    </div>
++  );
++}
++
++export default PaymentTermsApprovalModal;
+diff --git a/apps/frontend/src/components/modal/submitTermsModal.tsx b/apps/frontend/src/components/modal/submitTermsModal.tsx
+index 5d2072ae..c1eb695e 100644
+--- a/apps/frontend/src/components/modal/submitTermsModal.tsx
++++ b/apps/frontend/src/components/modal/submitTermsModal.tsx
+@@ -16,6 +16,7 @@ type Props = {
+   isOpen: boolean;
+   onClose: () => void;
+   applicationId: string;
++  orderId: number;
+   paymentTerms: CreatePaymentTerm;
+   orderDetails: {
+     exportPort: string;
+@@ -36,12 +37,13 @@ function SubmitTermsModal({
+   isOpen,
+   onClose,
+   applicationId,
++  orderId,
+   paymentTerms,
+   orderDetails,
+   counterpartyPrincipal,
+   onSuccess,
+ }: Props) {
+-  const { isSignedIn, stxAddress } = useTaralContracts();
++  const { isSignedIn, stxAddress, submitPaymentTerms } = useTaralContracts();
+   const [submitState, setSubmitState] = useState<SubmitState>("idle");
+   const [txId, setTxId] = useState<string | null>(null);
+   const [termsHash, setTermsHash] = useState<string | null>(null);
+@@ -71,16 +73,29 @@ function SubmitTermsModal({
+ 
+       setSubmitState("submitting");
+ 
+-      // TODO: Call actual contract function to submit terms on-chain
+-      // For now, simulate the submission
+-      await new Promise((resolve) => setTimeout(resolve, 2000));
++      // Convert amounts to micro-units (assuming 6 decimals)
++      const downpaymentMicro = Math.floor((paymentTerms.downpaymentAmount || 0) * 1000000);
++      const balanceMicro = Math.floor((paymentTerms.balanceAmount || 0) * 1000000);
++      const durationDays = paymentTerms.paymentDuration || 30;
++      // Convert percentage to basis points (e.g., 5% = 500 basis points)
++      const interestBasisPoints = Math.floor((paymentTerms.interestPercentage || 0) * 100);
+ 
+-      setTxId("0x" + hash.slice(0, 16) + "..."); // Simulated tx ID
++      // Call the actual contract function
++      const txData = await submitPaymentTerms(
++        orderId,
++        hash,
++        downpaymentMicro,
++        balanceMicro,
++        durationDays,
++        interestBasisPoints
++      );
++
++      setTxId(txData?.txId || "0x" + hash.slice(0, 16) + "...");
+       setSubmitState("success");
+       toast.success("Payment terms submitted on-chain!");
+ 
+       if (onSuccess) {
+-        onSuccess({ txId: hash, termsHash: hash });
++        onSuccess({ txId: txData?.txId || hash, termsHash: hash });
+       }
+     } catch (error: any) {
+       console.error("Error submitting terms:", error);
+diff --git a/apps/frontend/src/utils/hooks/useTaralContracts.ts b/apps/frontend/src/utils/hooks/useTaralContracts.ts
+index a3be21fe..264f374a 100644
+--- a/apps/frontend/src/utils/hooks/useTaralContracts.ts
++++ b/apps/frontend/src/utils/hooks/useTaralContracts.ts
+@@ -478,6 +478,246 @@ function useTaralContracts() {
+     });
+   }
+ 
++  /**
++   * Sign a purchase order as the exporter
++   * @param orderId - The order ID to sign
++   */
++  async function signAsExporter(orderId: number): Promise<any> {
++    return new Promise(async (resolve, reject) => {
++      const contractAddress = TARAL_PURCHASE_ORDER_CONTRACT.split(".")[0];
++      const contractName = TARAL_PURCHASE_ORDER_CONTRACT.split(".")[1];
++
++      const functionArgs = [uintCV(orderId)];
++
++      if (isSignedIn) {
++        await openContractCall({
++          contractAddress,
++          contractName,
++          functionName: "sign-as-exporter",
++          functionArgs: functionArgs,
++          postConditionMode: PostConditionMode.Allow,
++
++          onFinish: async (data: any) => {
++            console.log("Signed as exporter!", data);
++            resolve(data);
++          },
++          onCancel: () => {
++            console.log("Signing cancelled");
++            reject(new Error("User cancelled transaction"));
++          },
++        });
++      } else {
++        reject(new Error("User not signed in"));
++      }
++    });
++  }
++
++  /**
++   * Sign a purchase order as the importer
++   * @param orderId - The order ID to sign
++   */
++  async function signAsImporter(orderId: number): Promise<any> {
++    return new Promise(async (resolve, reject) => {
++      const contractAddress = TARAL_PURCHASE_ORDER_CONTRACT.split(".")[0];
++      const contractName = TARAL_PURCHASE_ORDER_CONTRACT.split(".")[1];
++
++      const functionArgs = [uintCV(orderId)];
++
++      if (isSignedIn) {
++        await openContractCall({
++          contractAddress,
++          contractName,
++          functionName: "sign-as-importer",
++          functionArgs: functionArgs,
++          postConditionMode: PostConditionMode.Allow,
++
++          onFinish: async (data: any) => {
++            console.log("Signed as importer!", data);
++            resolve(data);
++          },
++          onCancel: () => {
++            console.log("Signing cancelled");
++            reject(new Error("User cancelled transaction"));
++          },
++        });
++      } else {
++        reject(new Error("User not signed in"));
++      }
++    });
++  }
++
++  /**
++   * Reject a purchase order with a reason
++   * @param orderId - The order ID to reject
++   * @param reason - The rejection reason
++   */
++  async function rejectOrder(orderId: number, reason: string): Promise<any> {
++    return new Promise(async (resolve, reject) => {
++      const contractAddress = TARAL_PURCHASE_ORDER_CONTRACT.split(".")[0];
++      const contractName = TARAL_PURCHASE_ORDER_CONTRACT.split(".")[1];
++
++      const functionArgs = [uintCV(orderId), stringUtf8CV(reason)];
++
++      if (isSignedIn) {
++        await openContractCall({
++          contractAddress,
++          contractName,
++          functionName: "reject-order",
++          functionArgs: functionArgs,
++          postConditionMode: PostConditionMode.Allow,
++
++          onFinish: async (data: any) => {
++            console.log("Order rejected!", data);
++            resolve(data);
++          },
++          onCancel: () => {
++            console.log("Rejection cancelled");
++            reject(new Error("User cancelled transaction"));
++          },
++        });
++      } else {
++        reject(new Error("User not signed in"));
++      }
++    });
++  }
++
++  /**
++   * Submit payment terms for a purchase order
++   * @param orderId - The order ID
++   * @param termsHash - Hash of the payment terms document
++   * @param downpaymentAmount - Downpayment amount in micro-units
++   * @param balanceAmount - Balance amount in micro-units
++   * @param paymentDurationDays - Payment duration in days
++   * @param interestRate - Interest rate in basis points (500 = 5%)
++   */
++  async function submitPaymentTerms(
++    orderId: number,
++    termsHash: string,
++    downpaymentAmount: number,
++    balanceAmount: number,
++    paymentDurationDays: number,
++    interestRate: number
++  ): Promise<any> {
++    return new Promise(async (resolve, reject) => {
++      const contractAddress = TARAL_PURCHASE_ORDER_CONTRACT.split(".")[0];
++      const contractName = TARAL_PURCHASE_ORDER_CONTRACT.split(".")[1];
++
++      const termsHashBytes = hexToBytes(termsHash.startsWith("0x") ? termsHash.slice(2) : termsHash);
++
++      const functionArgs = [
++        uintCV(orderId),
++        bufferCV(termsHashBytes),
++        uintCV(downpaymentAmount),
++        uintCV(balanceAmount),
++        uintCV(paymentDurationDays),
++        uintCV(interestRate),
++      ];
++
++      if (isSignedIn) {
++        await openContractCall({
++          contractAddress,
++          contractName,
++          functionName: "submit-payment-terms",
++          functionArgs: functionArgs,
++          postConditionMode: PostConditionMode.Allow,
++
++          onFinish: async (data: any) => {
++            console.log("Payment terms submitted!", data);
++            resolve(data);
++          },
++          onCancel: () => {
++            console.log("Payment terms submission cancelled");
++            reject(new Error("User cancelled transaction"));
++          },
++        });
++      } else {
++        reject(new Error("User not signed in"));
++      }
++    });
++  }
++
++  /**
++   * Approve payment terms as the counterparty
++   * @param orderId - The order ID
++   */
++  async function approvePaymentTerms(orderId: number): Promise<any> {
++    return new Promise(async (resolve, reject) => {
++      const contractAddress = TARAL_PURCHASE_ORDER_CONTRACT.split(".")[0];
++      const contractName = TARAL_PURCHASE_ORDER_CONTRACT.split(".")[1];
++
++      const functionArgs = [uintCV(orderId)];
++
++      if (isSignedIn) {
++        await openContractCall({
++          contractAddress,
++          contractName,
++          functionName: "approve-payment-terms",
++          functionArgs: functionArgs,
++          postConditionMode: PostConditionMode.Allow,
++
++          onFinish: async (data: any) => {
++            console.log("Payment terms approved!", data);
++            resolve(data);
++          },
++          onCancel: () => {
++            console.log("Payment terms approval cancelled");
++            reject(new Error("User cancelled transaction"));
++          },
++        });
++      } else {
++        reject(new Error("User not signed in"));
++      }
++    });
++  }
++
++  /**
++   * Get order status from storage contract
++   * @param orderId - The order ID
++   */
++  async function getOrderStatus(orderId: number) {
++    try {
++      const contractAddress = PURCHASE_ORDER_STORAGE_CONTRACT.split(".")[0];
++      const contractName = PURCHASE_ORDER_STORAGE_CONTRACT.split(".")[1];
++
++      const result: any = await fetchReadOnlyFunction({
++        network: network,
++        contractAddress,
++        contractName,
++        senderAddress: contractAddress,
++        functionArgs: [uintCV(orderId)],
++        functionName: "get-order-status",
++      });
++      return result;
++    } catch (e: any) {
++      console.error("Error fetching order status:", e);
++      return null;
++    }
++  }
++
++  /**
++   * Get payment terms detail from storage contract
++   * @param orderId - The order ID
++   */
++  async function getPaymentTermsDetail(orderId: number) {
++    try {
++      const contractAddress = PURCHASE_ORDER_STORAGE_CONTRACT.split(".")[0];
++      const contractName = PURCHASE_ORDER_STORAGE_CONTRACT.split(".")[1];
++
++      const result: any = await fetchReadOnlyFunction({
++        network: network,
++        contractAddress,
++        contractName,
++        senderAddress: contractAddress,
++        functionArgs: [uintCV(orderId)],
++        functionName: "get-payment-terms-detail",
++      });
++      return result;
++    } catch (e: any) {
++      console.error("Error fetching payment terms:", e);
++      return null;
++    }
++  }
++
+   return {
+     // general variables
+     stxAddress,
+@@ -499,6 +739,15 @@ function useTaralContracts() {
+     getCurrentOrderIdNonce,
+     createVault,
+     repayLoan,
++
++    // signing and approval functions
++    signAsExporter,
++    signAsImporter,
++    rejectOrder,
++    submitPaymentTerms,
++    approvePaymentTerms,
++    getOrderStatus,
++    getPaymentTermsDetail,
+   };
+ }
+ export default useTaralContracts;
