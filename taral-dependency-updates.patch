@@ -1,0 +1,829 @@
+From 138567eadab3883f7a75c4effba50e4a04315204 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Mon, 12 Jan 2026 14:09:56 +0000
+Subject: [PATCH] chore(deps): update dependencies for Node.js 18+
+ compatibility
+
+- Update Node.js engine requirement from >=14 to >=18 across all packages
+- Update @hirosystems/clarinet-sdk from ^1.2.0 to ^2.8.1
+- Update @stacks/transactions from ^6.9.0 to ^6.17.0
+- Update @stacks/network from ^6.0.0 to ^6.17.0
+- Update @stacks/common from ^6.10.0 to ^6.17.0
+- Update vitest from ^0.34.4 to ^2.1.8
+- Update vitest-environment-clarinet from ^1.1.0 to ^2.1.0
+- Update TypeScript from various versions to ^5.6.0
+- Update ESLint and typescript-eslint to latest v7/v8 compatible versions
+- Update Prettier and related plugins to latest versions
+---
+ apps/frontend/package.json                       |  2 +-
+ apps/oracle/package.json                         |  8 ++++----
+ apps/scripts/package.json                        |  4 ++--
+ apps/web-testbed/package.json                    |  8 ++++----
+ libs/api/package.json                            |  6 +++---
+ libs/bitcoin/package.json                        |  6 +++---
+ libs/clarity-bin/package.json                    |  4 ++--
+ libs/generate/package.json                       |  6 +++---
+ libs/infrastructure/package.json                 |  6 +++---
+ libs/node/package.json                           |  8 ++++----
+ libs/oracle/package.json                         |  4 ++--
+ libs/shared/package.json                         |  6 +++---
+ libs/stacks/package.json                         | 10 +++++-----
+ libs/storage/package.json                        |  4 ++--
+ libs/swap/package.json                           |  4 ++--
+ libs/testing/package.json                        |  8 ++++----
+ libs/ui/package.json                             |  2 +-
+ libs/web/package.json                            |  8 ++++----
+ package.json                                     | 16 ++++++++--------
+ packages/clarity/package.json                    | 10 +++++-----
+ packages/configuration/package.json              |  6 +++---
+ packages/contracts/package.json                  |  4 ++--
+ packages/docs/package.json                       |  4 ++--
+ packages/integration-tests/package.json          |  4 ++--
+ packages/unit-tests/package.json                 |  6 +++---
+ standalone/chainhook/package.json                |  2 +-
+ standalone/modules/cron/package.json             |  4 ++--
+ standalone/modules/events/package.json           |  4 ++--
+ standalone/modules/logger-telemetry/package.json |  4 ++--
+ standalone/modules/multipart/package.json        |  4 ++--
+ standalone/modules/storage/package.json          |  2 +-
+ standalone/modules/telemetry/package.json        |  4 ++--
+ standalone/portal-api/package.json               |  2 +-
+ 33 files changed, 90 insertions(+), 90 deletions(-)
+
+diff --git a/apps/frontend/package.json b/apps/frontend/package.json
+index 53fdf9eb..a3bfc83e 100644
+--- a/apps/frontend/package.json
++++ b/apps/frontend/package.json
+@@ -23,7 +23,7 @@
+     "@micro-stacks/react": "1.0.9",
+     "@react-pdf-viewer/core": "3.6.0",
+     "@react-pdf-viewer/zoom": "3.6.0",
+-    "@stacks/transactions": "^6.9.0",
++    "@stacks/transactions": "^6.17.0",
+     "@stacks/stacks-blockchain-api-types": "7.8.2",
+     "@tanstack/query-core": "5.14.0",
+     "@tanstack/react-query": "5.8.4",
+diff --git a/apps/oracle/package.json b/apps/oracle/package.json
+index 1c6aa826..0b7238d7 100644
+--- a/apps/oracle/package.json
++++ b/apps/oracle/package.json
+@@ -50,7 +50,7 @@
+     "prettier": "^3.0.0",
+     "ts-jest": "^27.0.5",
+     "ts-node": "^10.9.1",
+-    "typescript": "^5.1.6",
++    "typescript": "^5.6.0",
+     "taral-configuration": "1.0.0",
+     "lib-shared": "1.0.0",
+     "lib-stacks": "1.0.0",
+@@ -59,11 +59,11 @@
+     "taral-contracts": "1.0.0",
+     "javascript-stringify": "2.1.0",
+     "@stacks/blockchain-api-client": "7.14.1",
+-    "@stacks/common": "^6.10.0",
+-    "@stacks/network": "^6.0.0",
++    "@stacks/common": "^6.17.0",
++    "@stacks/network": "^6.17.0",
+     "@stacks/wallet-sdk": "^4.2.0",
+     "@stacks/stacks-blockchain-api-types": "^7.3.4",
+-    "@stacks/transactions": "^6.9.0",
++    "@stacks/transactions": "^6.17.0",
+     "@types/json-schema": "^7.0.14",
+     "ajv": "^8.12.0",
+     "bip32": "^4.0.0",
+diff --git a/apps/scripts/package.json b/apps/scripts/package.json
+index 2033e548..8320a479 100644
+--- a/apps/scripts/package.json
++++ b/apps/scripts/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "generate": "ts-node generate.ts",
+@@ -16,7 +16,7 @@
+   },
+   "devDependencies": {
+     "ts-node": "^10.9.1",
+-    "typescript": "^5.1.6"
++    "typescript": "^5.6.0"
+   },
+   "dependencies": {
+     "axios": "1.7.5",
+diff --git a/apps/web-testbed/package.json b/apps/web-testbed/package.json
+index f8ab4097..296fb2d1 100644
+--- a/apps/web-testbed/package.json
++++ b/apps/web-testbed/package.json
+@@ -69,18 +69,18 @@
+     "style-loader": "3.3.3",
+     "terser-webpack-plugin": "5.3.9",
+     "ts-pnp": "1.2.0",
+-    "typescript": "^5.1.6",
++    "typescript": "^5.6.0",
+     "url-loader": "4.1.1",
+     "web-vitals": "^3.5.1",
+     "webpack": "5.89.0",
+     "webpack-dev-server": "4.15.1",
+     "webpack-manifest-plugin": "5.0.0",
+     "workbox-webpack-plugin": "7.0.0",
+-    "@stacks/common": "^6.10.0",
+-    "@stacks/network": "^6.0.0",
++    "@stacks/common": "^6.17.0",
++    "@stacks/network": "^6.17.0",
+     "@stacks/wallet-sdk": "^4.2.0",
+     "@stacks/stacks-blockchain-api-types": "^7.3.4",
+-    "@stacks/transactions": "6.9.0",
++    "@stacks/transactions": "6.17.0",
+     "@stacks/connect": "7.7.1",
+     "react-query": "^4.0.0",
+     "react-router-dom": "^6.21.3",
+diff --git a/libs/api/package.json b/libs/api/package.json
+index 1c4ec7c2..d3c3d2db 100644
+--- a/libs/api/package.json
++++ b/libs/api/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "compile": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ./tsconfig.types.json",
+@@ -16,9 +16,9 @@
+     "@types/node": "20.10.0"
+   },
+   "dependencies": {
+-    "@stacks/network": "^6.0.0",
++    "@stacks/network": "^6.17.0",
+     "@stacks/stacks-blockchain-api-types": "^7.3.4",
+-    "@stacks/transactions": "^6.9.0",
++    "@stacks/transactions": "^6.17.0",
+     "lib-infra": "file:./../infrastructure",
+     "lib-shared": "file:./../shared",
+     "lib-stacks": "file:./../stacks",
+diff --git a/libs/bitcoin/package.json b/libs/bitcoin/package.json
+index 0cfad849..c7c19205 100644
+--- a/libs/bitcoin/package.json
++++ b/libs/bitcoin/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "compile": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ./tsconfig.types.json",
+@@ -15,10 +15,10 @@
+   "devDependencies": {
+     "@types/bluebird": "^3.5.38",
+     "@types/node": "20.10.0",
+-    "typescript": "^5.1.6"
++    "typescript": "^5.6.0"
+   },
+   "dependencies": {
+-    "@stacks/transactions": "^6.9.0",
++    "@stacks/transactions": "^6.17.0",
+     "@types/wif": "^2.0.4",
+     "bip32": "^4.0.0",
+     "bip39": "^3.1.0",
+diff --git a/libs/clarity-bin/package.json b/libs/clarity-bin/package.json
+index 818c0d91..cb00ce66 100644
+--- a/libs/clarity-bin/package.json
++++ b/libs/clarity-bin/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "compile": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ./tsconfig.types.json",
+@@ -17,7 +17,7 @@
+     "@types/node": "20.10.0",
+     "@types/node-fetch": "2.5.10",
+     "@types/unzipper": "^0.10.7",
+-    "typescript": "^5.1.6"
++    "typescript": "^5.6.0"
+   },
+   "dependencies": {
+     "fs-extra": "^11.2.0",
+diff --git a/libs/generate/package.json b/libs/generate/package.json
+index 32c787ea..ea2ac112 100644
+--- a/libs/generate/package.json
++++ b/libs/generate/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "compile": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ./tsconfig.types.json",
+@@ -14,10 +14,10 @@
+   },
+   "devDependencies": {
+     "@types/node": "20.10.0",
+-    "typescript": "^5.1.6"
++    "typescript": "^5.6.0"
+   },
+   "dependencies": {
+-    "@stacks/transactions": "6.9.0",
++    "@stacks/transactions": "6.17.0",
+     "lib-clarity-bin": "file:./../clarity-bin",
+     "lib-shared": "file:./../shared",
+     "lib-testing": "file:./../testing",
+diff --git a/libs/infrastructure/package.json b/libs/infrastructure/package.json
+index f324bb38..e956a08a 100644
+--- a/libs/infrastructure/package.json
++++ b/libs/infrastructure/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "compile": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ./tsconfig.types.json",
+@@ -15,10 +15,10 @@
+   "devDependencies": {
+     "@ltd/j-toml": "^1.38.0",
+     "@types/node": "20.10.0",
+-    "typescript": "^5.1.6"
++    "typescript": "^5.6.0"
+   },
+   "dependencies": {
+-    "@stacks/network": "^6.0.0",
++    "@stacks/network": "^6.17.0",
+     "@stacks/wallet-sdk": "^4.2.0",
+     "lib-clarity-bin": "file:./../clarity-bin",
+     "lib-shared": "file:./../shared",
+diff --git a/libs/node/package.json b/libs/node/package.json
+index 38b0a83e..633f5fe2 100644
+--- a/libs/node/package.json
++++ b/libs/node/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "compile": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ./tsconfig.types.json",
+@@ -13,12 +13,12 @@
+     "build": "npm-run-all build:clean compile && node ./scripts/prepare-package-json"
+   },
+   "devDependencies": {
+-    "typescript": "^5.1.6"
++    "typescript": "^5.6.0"
+   },
+   "dependencies": {
+     "@stacks/blockchain-api-client": "^7.14.1",
+-    "@stacks/network": "^6.0.0",
+-    "@stacks/transactions": "^6.9.0",
++    "@stacks/network": "^6.17.0",
++    "@stacks/transactions": "^6.17.0",
+     "bn.js": "^5.2.1",
+     "cross-fetch": "^4.0.0",
+     "lib-shared": "file:./../shared",
+diff --git a/libs/oracle/package.json b/libs/oracle/package.json
+index 4e1783cd..ff98a276 100644
+--- a/libs/oracle/package.json
++++ b/libs/oracle/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "compile": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ./tsconfig.types.json",
+@@ -14,7 +14,7 @@
+   },
+   "devDependencies": {
+     "@types/node": "20.10.0",
+-    "typescript": "^5.1.6"
++    "typescript": "^5.6.0"
+   },
+   "dependencies": {
+     "@types/web3": "^1.2.2",
+diff --git a/libs/shared/package.json b/libs/shared/package.json
+index 264b588e..29d71e7e 100644
+--- a/libs/shared/package.json
++++ b/libs/shared/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "compile": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ./tsconfig.types.json",
+@@ -15,10 +15,10 @@
+   "devDependencies": {
+     "@types/node": "20.10.0",
+     "@types/uuid": "^9.0.8",
+-    "typescript": "^5.1.6"
++    "typescript": "^5.6.0"
+   },
+   "dependencies": {
+-    "@stacks/transactions": "^6.9.0",
++    "@stacks/transactions": "^6.17.0",
+     "c32check": "^2.0.0",
+     "chalk": "^4.1.2",
+     "dayjs": "^1.11.9",
+diff --git a/libs/stacks/package.json b/libs/stacks/package.json
+index 502842ce..92ffa836 100644
+--- a/libs/stacks/package.json
++++ b/libs/stacks/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "compile": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ./tsconfig.types.json",
+@@ -15,14 +15,14 @@
+   "devDependencies": {
+     "@types/elliptic": "^6.4.18",
+     "@types/node": "20.10.0",
+-    "typescript": "^5.1.6"
++    "typescript": "^5.6.0"
+   },
+   "dependencies": {
+     "@noble/secp256k1": "1.7.1",
+     "@stacks/blockchain-api-client": "^7.14.1",
+-    "@stacks/common": "^6.10.0",
+-    "@stacks/network": "^6.0.0",
+-    "@stacks/transactions": "^6.9.0",
++    "@stacks/common": "^6.17.0",
++    "@stacks/network": "^6.17.0",
++    "@stacks/transactions": "^6.17.0",
+     "c32check": "^2.0.0",
+     "cross-fetch": "^4.0.0",
+     "elliptic": "^6.5.4",
+diff --git a/libs/storage/package.json b/libs/storage/package.json
+index 7532fcd8..831711fb 100644
+--- a/libs/storage/package.json
++++ b/libs/storage/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "compile": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ./tsconfig.types.json",
+@@ -14,7 +14,7 @@
+   },
+   "devDependencies": {
+     "@types/node": "20.10.0",
+-    "typescript": "^5.1.6"
++    "typescript": "^5.6.0"
+   },
+   "dependencies": {
+     "@types/axios": "0.14.0",
+diff --git a/libs/swap/package.json b/libs/swap/package.json
+index 939bcb53..ff7ae63f 100644
+--- a/libs/swap/package.json
++++ b/libs/swap/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "compile": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ./tsconfig.types.json",
+@@ -13,7 +13,7 @@
+     "build": "npm-run-all build:clean compile && node ./scripts/prepare-package-json"
+   },
+   "devDependencies": {
+-    "typescript": "^5.1.6"
++    "typescript": "^5.6.0"
+   },
+   "dependencies": {
+     "@types/crypto-js": "^4.1.1",
+diff --git a/libs/testing/package.json b/libs/testing/package.json
+index 979f3bff..cc8cb3a4 100644
+--- a/libs/testing/package.json
++++ b/libs/testing/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "compile": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ./tsconfig.types.json",
+@@ -14,11 +14,11 @@
+   },
+   "devDependencies": {
+     "@types/node": "20.10.0",
+-    "typescript": "^5.1.6"
++    "typescript": "^5.6.0"
+   },
+   "dependencies": {
+-    "@stacks/network": "^6.0.0",
+-    "@stacks/transactions": "^6.9.0",
++    "@stacks/network": "^6.17.0",
++    "@stacks/transactions": "^6.17.0",
+     "lib-clarity-bin": "file:./../clarity-bin",
+     "lib-infra": "file:./../infrastructure",
+     "lib-shared": "file:./../shared",
+diff --git a/libs/ui/package.json b/libs/ui/package.json
+index ad355f44..131f5463 100644
+--- a/libs/ui/package.json
++++ b/libs/ui/package.json
+@@ -46,7 +46,7 @@
+     "rollup-plugin-svg": "2.0.0",
+     "rollup-plugin-typescript2": "0.36.0",
+     "ts-jest": "29.0.5",
+-    "typescript": "4.9.4"
++    "typescript": "^5.6.0"
+   },
+   "resolutions": {
+     "@types/react": "18.2.45",
+diff --git a/libs/web/package.json b/libs/web/package.json
+index 0dd3c3fa..e1ea34ab 100644
+--- a/libs/web/package.json
++++ b/libs/web/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "compile": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ./tsconfig.types.json",
+@@ -13,13 +13,13 @@
+     "build": "npm-run-all build:clean compile && node ./scripts/prepare-package-json"
+   },
+   "devDependencies": {
+-    "typescript": "^5.1.6"
++    "typescript": "^5.6.0"
+   },
+   "dependencies": {
+     "@stacks/connect": "7.7.1",
+     "@stacks/blockchain-api-client": "^7.14.1",
+-    "@stacks/network": "^6.0.0",
+-    "@stacks/transactions": "^6.9.0",
++    "@stacks/network": "^6.17.0",
++    "@stacks/transactions": "^6.17.0",
+     "cross-fetch": "^4.0.0",
+     "lib-shared": "file:./../shared",
+     "lib-stacks": "file:./../stacks",
+diff --git a/package.json b/package.json
+index 54c1692e..fb8a1c75 100644
+--- a/package.json
++++ b/package.json
+@@ -4,7 +4,7 @@
+   "description": "Taral local development environment for clarity contracts",
+   "main": "index.js",
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "private": "true",
+   "workspaces": [
+@@ -73,17 +73,17 @@
+   },
+   "homepage": "https://github.com/taraldefi/taral#readme",
+   "devDependencies": {
+-    "@typescript-eslint/eslint-plugin": "^6.12.0",
+-    "@typescript-eslint/parser": "^6.12.0",
++    "@typescript-eslint/eslint-plugin": "^7.18.0",
++    "@typescript-eslint/parser": "^7.18.0",
+     "codecov": "^3.8.1",
+     "commitizen": "^4.3.0",
+     "cz-conventional-changelog": "^3.3.0",
+-    "eslint": "^8.54.0",
+-    "eslint-config-prettier": "^9.0.0",
++    "eslint": "^8.57.0",
++    "eslint-config-prettier": "^9.1.0",
+     "eslint-plugin-node": "^11.1.0",
+-    "eslint-plugin-prettier": "^5.0.1",
+-    "lint-staged": "^15.1.0",
+-    "prettier": "^3.0.0"
++    "eslint-plugin-prettier": "^5.2.1",
++    "lint-staged": "^15.2.0",
++    "prettier": "^3.4.0"
+   },
+   "lint-staged": {
+     "*.ts": "eslint --cache --cache-location .eslintcache ./libs/**/* ./packages/unit-tests ./packages/integration-tests --fix"
+diff --git a/packages/clarity/package.json b/packages/clarity/package.json
+index 1b0762d3..4d079312 100644
+--- a/packages/clarity/package.json
++++ b/packages/clarity/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "eol": "npx eolConverter \"contracts/**/*.clar\"",
+@@ -17,11 +17,11 @@
+   },
+   "dependencies": {
+     "eol-converter-cli": "^1.0.8",
+-    "@hirosystems/clarinet-sdk": "^1.2.0",
+-    "@stacks/transactions": "^6.9.0",
++    "@hirosystems/clarinet-sdk": "^2.8.1",
++    "@stacks/transactions": "^6.17.0",
+     "chokidar-cli": "^3.0.0",
+     "vite": "^5.4.2",
+-    "vitest": "^0.34.4",
+-    "vitest-environment-clarinet": "^1.1.0"
++    "vitest": "^2.1.8",
++    "vitest-environment-clarinet": "^2.1.0"
+   }
+ }
+diff --git a/packages/configuration/package.json b/packages/configuration/package.json
+index ff926e6b..bf43f08e 100644
+--- a/packages/configuration/package.json
++++ b/packages/configuration/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "compile": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ./tsconfig.types.json",
+@@ -13,10 +13,10 @@
+     "build": "npm-run-all build:clean compile && node ./scripts/prepare-package-json"
+   },
+   "devDependencies": {
+-    "typescript": "^5.1.6"
++    "typescript": "^5.6.0"
+   },
+   "dependencies": {
+-    "@stacks/network": "^6.0.0",
++    "@stacks/network": "^6.17.0",
+     "npm-run-all": "^4.1.5"
+   }
+ }
+diff --git a/packages/contracts/package.json b/packages/contracts/package.json
+index 676a3a6a..cc9acbf2 100644
+--- a/packages/contracts/package.json
++++ b/packages/contracts/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "compile": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ./tsconfig.types.json",
+@@ -13,7 +13,7 @@
+     "build": "npm-run-all build:clean compile && node ./scripts/prepare-package-json"
+   },
+   "devDependencies": {
+-    "typescript": "^5.1.6"
++    "typescript": "^5.6.0"
+   },
+   "dependencies": {
+     "lib-shared": "file:./../../libs/shared",
+diff --git a/packages/docs/package.json b/packages/docs/package.json
+index 34fa6c6c..4dafc4d1 100644
+--- a/packages/docs/package.json
++++ b/packages/docs/package.json
+@@ -4,7 +4,7 @@
+   "description": "Taral local development environment for clarity contracts",
+   "main": "index.js",
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "private": "true",
+   "scripts": {
+@@ -53,7 +53,7 @@
+   "homepage": "https://github.com/taraldefi/taral#readme",
+   "devDependencies": {
+     "@appnest/readme": "^1.2.7",
+-    "typescript": "^5.1.6",
++    "typescript": "^5.6.0",
+     "prettier": "^3.0.0"
+   }
+ }
+diff --git a/packages/integration-tests/package.json b/packages/integration-tests/package.json
+index f178aa40..e36d11d7 100644
+--- a/packages/integration-tests/package.json
++++ b/packages/integration-tests/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "integration-tests": "jest --runInBand --testPathIgnorePatterns swap.test.ts",
+@@ -16,7 +16,7 @@
+   "devDependencies": {
+     "@types/node": "20.10.0",
+     "jest": "^27.0.0",
+-    "typescript": "^5.1.6"
++    "typescript": "^5.6.0"
+   },
+   "dependencies": {
+     "@stacks/blockchain-api-client": "^7.14.1",
+diff --git a/packages/unit-tests/package.json b/packages/unit-tests/package.json
+index bd3249cf..00be0d92 100644
+--- a/packages/unit-tests/package.json
++++ b/packages/unit-tests/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "unit-tests": "jest --runInBand --testPathIgnorePatterns storage.test.ts oracle.test.ts",
+@@ -17,11 +17,11 @@
+   },
+   "devDependencies": {
+     "jest": "^28.0.2",
+-    "typescript": "^5.1.6"
++    "typescript": "^5.6.0"
+   },
+   "dependencies": {
+     "@noble/secp256k1": "1.7.1",
+-    "@stacks/common": "^6.10.0",
++    "@stacks/common": "^6.17.0",
+     "lib-clarity-bin": "file:./../../libs/clarity-bin",
+     "lib-infra": "file:./../../libs/infrastructure",
+     "lib-oracle": "file:./../../libs/oracle",
+diff --git a/standalone/chainhook/package.json b/standalone/chainhook/package.json
+index 37982c11..632f6fae 100644
+--- a/standalone/chainhook/package.json
++++ b/standalone/chainhook/package.json
+@@ -29,7 +29,7 @@
+     "@nestjs/microservices": "^10.0.4",
+     "@nestjs/passport": "^8.2.1",
+     "@nestjs/platform-express": "^10.0.4",
+-    "@stacks/transactions": "^6.5.4",
++    "@stacks/transactions": "^6.17.0",
+     "@types/lodash": "^4.14.195",
+     "@types/passport-strategy": "^0.2.35",
+     "amqp-connection-manager": "^4.1.13",
+diff --git a/standalone/modules/cron/package.json b/standalone/modules/cron/package.json
+index 72536b76..ec42473e 100644
+--- a/standalone/modules/cron/package.json
++++ b/standalone/modules/cron/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "build": "rm -rf dist && tsc -p tsconfig.json"
+@@ -15,7 +15,7 @@
+     "@nestjs/core": "^9.0.11",
+     "@types/node": "^18.0.5",
+     "reflect-metadata": "^0.1.13",
+-    "typescript": "^4.7.4",
++    "typescript": "^5.6.0",
+     "rxjs": "^7.5.2",
+     "agenda": "^5.0.0",
+     "mongodb-memory-server": "^8.11.5"
+diff --git a/standalone/modules/events/package.json b/standalone/modules/events/package.json
+index 0f58ead4..05190e43 100644
+--- a/standalone/modules/events/package.json
++++ b/standalone/modules/events/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "build": "rm -rf dist && tsc -p tsconfig.json"
+@@ -15,7 +15,7 @@
+     "@nestjs/core": "^9.0.11",
+     "@types/node": "^18.0.5",
+     "reflect-metadata": "^0.1.13",
+-    "typescript": "^4.7.4",
++    "typescript": "^5.6.0",
+     "rxjs": "^7.5.2"
+   },
+   "peerDependencies": {
+diff --git a/standalone/modules/logger-telemetry/package.json b/standalone/modules/logger-telemetry/package.json
+index 99105b40..d840914c 100644
+--- a/standalone/modules/logger-telemetry/package.json
++++ b/standalone/modules/logger-telemetry/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "build": "rm -rf dist && tsc -p tsconfig.json"
+@@ -20,7 +20,7 @@
+     "@nestjs/core": "^9.0.11",
+     "@types/node": "^18.0.5",
+     "reflect-metadata": "^0.1.13",
+-    "typescript": "^4.7.4",
++    "typescript": "^5.6.0",
+     "rxjs": "^7.5.2"
+   },
+   "peerDependencies": {
+diff --git a/standalone/modules/multipart/package.json b/standalone/modules/multipart/package.json
+index 57f9d41b..1f399607 100644
+--- a/standalone/modules/multipart/package.json
++++ b/standalone/modules/multipart/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "build": "rm -rf dist && tsc -p tsconfig.json"
+@@ -25,7 +25,7 @@
+     "@nestjs/core": "^9.0.11",
+     "@types/node": "^18.0.5",
+     "reflect-metadata": "^0.1.13",
+-    "typescript": "^4.7.4",
++    "typescript": "^5.6.0",
+     "rxjs": "^7.5.2"
+   },
+   "peerDependencies": {
+diff --git a/standalone/modules/storage/package.json b/standalone/modules/storage/package.json
+index baae6084..49ff155f 100644
+--- a/standalone/modules/storage/package.json
++++ b/standalone/modules/storage/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "build": "rm -rf dist && tsc -p tsconfig.json"
+diff --git a/standalone/modules/telemetry/package.json b/standalone/modules/telemetry/package.json
+index 56fc7b8e..62a9c0f5 100644
+--- a/standalone/modules/telemetry/package.json
++++ b/standalone/modules/telemetry/package.json
+@@ -5,7 +5,7 @@
+   "license": "ISC",
+   "private": true,
+   "engines": {
+-    "node": ">=14"
++    "node": ">=18"
+   },
+   "scripts": {
+     "build": "rm -rf dist && tsc -p tsconfig.json"
+@@ -38,7 +38,7 @@
+     "@types/node": "^18.0.5",
+     "reflect-metadata": "^0.1.13",
+     "rxjs": "^7.5.2",
+-    "typescript": "^4.7.4"
++    "typescript": "^5.6.0"
+   },
+   "peerDependencies": {
+     "@nestjs/common": "^7.0.0 || ^8.0.0 || ^9.0.0",
+diff --git a/standalone/portal-api/package.json b/standalone/portal-api/package.json
+index fe3bcc52..18a7f930 100644
+--- a/standalone/portal-api/package.json
++++ b/standalone/portal-api/package.json
+@@ -130,7 +130,7 @@
+     "@nestjs/cli": "9.4.2",
+     "@nestjs/testing": "9.4.0",
+     "@noble/secp256k1": "1.5.5",
+-    "@stacks/network": "^6.0.0",
++    "@stacks/network": "^6.17.0",
+     "@types/express": "4.17.13",
+     "@types/jest": "27.5.1",
+     "@types/multer": "1.4.7",
+-- 
+2.43.0
+
