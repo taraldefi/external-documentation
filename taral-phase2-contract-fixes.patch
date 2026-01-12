@@ -1,0 +1,81 @@
+diff --git a/packages/clarity/contracts/taral/purchase-order-storage.clar b/packages/clarity/contracts/taral/purchase-order-storage.clar
+index 08008ae6..f7367c1f 100644
+--- a/packages/clarity/contracts/taral/purchase-order-storage.clar
++++ b/packages/clarity/contracts/taral/purchase-order-storage.clar
+@@ -236,19 +236,26 @@
+   (exp-signed-at uint)
+   (imp-signed-at uint)
+   (rejection-reason (optional (string-utf8 500))))
+-  (ok (map-set order-status
+-    {id: order-id}
+-    {
+-      status: new-status,
+-      exporter-signed: exp-signed,
+-      importer-signed: imp-signed,
+-      exporter-signed-at: exp-signed-at,
+-      importer-signed-at: imp-signed-at,
+-      rejection-reason: rejection-reason,
+-      created-at: (default-to block-height (get created-at (map-get? order-status {id: order-id}))),
+-      updated-at: block-height
+-    }
+-  ))
++  (let (
++    (existing-status (map-get? order-status {id: order-id}))
++    (existing-created-at (match existing-status
++      status-data (get created-at status-data)
++      block-height))
++  )
++    (ok (map-set order-status
++      {id: order-id}
++      {
++        status: new-status,
++        exporter-signed: exp-signed,
++        importer-signed: imp-signed,
++        exporter-signed-at: exp-signed-at,
++        importer-signed-at: imp-signed-at,
++        rejection-reason: rejection-reason,
++        created-at: existing-created-at,
++        updated-at: block-height
++      }
++    ))
++  )
+ )
+ 
+ ;; ============================================
+diff --git a/packages/clarity/contracts/taral/taral-purchase-order.clar b/packages/clarity/contracts/taral/taral-purchase-order.clar
+index 905d7097..eba2ce03 100644
+--- a/packages/clarity/contracts/taral/taral-purchase-order.clar
++++ b/packages/clarity/contracts/taral/taral-purchase-order.clar
+@@ -310,8 +310,8 @@
+     (let (
+       (caller-exporter-id (contract-call? .exporter-storage get-exporter-by-principal tx-sender))
+       (caller-importer-id (contract-call? .importer-storage get-importer-by-principal tx-sender))
+-      (is-exporter (and (is-ok caller-exporter-id) (is-eq exporter-id (unwrap-panic caller-exporter-id))))
+-      (is-importer (and (is-ok caller-importer-id) (is-eq importer-id (unwrap-panic caller-importer-id))))
++      (is-exporter (and (is-some caller-exporter-id) (is-eq exporter-id (unwrap-panic caller-exporter-id))))
++      (is-importer (and (is-some caller-importer-id) (is-eq importer-id (unwrap-panic caller-importer-id))))
+     )
+       (asserts! (or is-exporter is-importer) ERR_NOT_AUTHORIZED)
+       ;; Verify order not already completed or rejected
+@@ -357,8 +357,8 @@
+     (let (
+       (caller-exporter-id (contract-call? .exporter-storage get-exporter-by-principal tx-sender))
+       (caller-importer-id (contract-call? .importer-storage get-importer-by-principal tx-sender))
+-      (is-exporter (and (is-ok caller-exporter-id) (is-eq exporter-id (unwrap-panic caller-exporter-id))))
+-      (is-importer (and (is-ok caller-importer-id) (is-eq importer-id (unwrap-panic caller-importer-id))))
++      (is-exporter (and (is-some caller-exporter-id) (is-eq exporter-id (unwrap-panic caller-exporter-id))))
++      (is-importer (and (is-some caller-importer-id) (is-eq importer-id (unwrap-panic caller-importer-id))))
+     )
+       (asserts! (or is-exporter is-importer) ERR_NOT_AUTHORIZED)
+       (asserts! (> (len terms-hash) u0) ERR_EMPTY_HASH)
+@@ -394,8 +394,8 @@
+     (let (
+       (caller-exporter-id (contract-call? .exporter-storage get-exporter-by-principal tx-sender))
+       (caller-importer-id (contract-call? .importer-storage get-importer-by-principal tx-sender))
+-      (is-exporter (and (is-ok caller-exporter-id) (is-eq exporter-id (unwrap-panic caller-exporter-id))))
+-      (is-importer (and (is-ok caller-importer-id) (is-eq importer-id (unwrap-panic caller-importer-id))))
++      (is-exporter (and (is-some caller-exporter-id) (is-eq exporter-id (unwrap-panic caller-exporter-id))))
++      (is-importer (and (is-some caller-importer-id) (is-eq importer-id (unwrap-panic caller-importer-id))))
+     )
+       ;; Must be either exporter or importer
+       (asserts! (or is-exporter is-importer) ERR_NOT_AUTHORIZED)
